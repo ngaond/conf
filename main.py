@@ -4,81 +4,85 @@ import sys
 import time
 
 
-
-
 class Requests(object):
     def __init__(self):
         self.source_ip = ''
         self.destination_ip = []
         self.destination_port = []
-        self.requestq = "''"
+        self.requestq = ''
         self.requests = []
 
 
 def get_badip():
     global badip_list
     global ip_string
-    global badip_list
-    badip_tring+''
+    global badip_list_bp
     list1 = []
-
+    ip_string=''
     # 悪意フラグリクエスト抽出
-    while(True):
+    while True:
         query = {'query':
-                     {'bool':
-                          {'must':
-                               {'term': {'@timestamp': '2021-01-17'}},
-                           'should': [
-                               {'regexp': {'request': '.*wget.*http.*:[0-9].*'}},
-                               {'regexp': {'request': '.*curl.*http.*:[0-9].*'}},
-                               {'regexp': {'request': '.*fetch.*http.*:[0-9].*'}},
-                               {'regexp': {'request': '.*java.net.URL.*http.*:[0-9].*'}},
-                               {'regexp': {'request': '.*urlopen.*http.*:[0-9].*'}},
-                               {'regexp': {'request': '.*bitsadmin.*http.*:[0-9].*'}},
-                               {'regexp': {'request': '.*explorer.*http.*:[0-9].*'}},
-                               {'regexp': {'request': '.*certutil.*http.*:[0-9].*'}},
-                               {'regexp': {'request': '.*Wscript.*http.*:[0-9].*'}},
-                               {'regexp': {'request': '.*getstore.*http.*:[0-9].*'}},
-                               {'regexp': {'request': '.*HTTP.start.*http.*:[0-9].*'}},
-                               {'regexp': {'request': '.*lwp-download.*http.*:[0-9].*'}},
-                               {'regexp': {'request': '.*objXMLHTTP.*http.*:[0-9].*'}},
-                               {'regexp': {'request': '.*mshta.*http.*:[0-9].*'}}
-                           ],
-                           'must_not': {'source_ip': ip_string}}}}
+                  {"filtered":
+                    {"filter":
+                         {'bool':
+                              {'must':
+                                   {'term': {'@timestamp': '2021-01-17'}},
+                               'should': [
+                                   {'regexp': {'request': '.*wget.*http.*:[0-9].*'}},
+                                   {'regexp': {'request': '.*curl.*http.*:[0-9].*'}},
+                                   {'regexp': {'request': '.*fetch.*http.*:[0-9].*'}},
+                                   {'regexp': {'request': '.*java.net.URL.*http.*:[0-9].*'}},
+                                   {'regexp': {'request': '.*urlopen.*http.*:[0-9].*'}},
+                                   {'regexp': {'request': '.*bitsadmin.*http.*:[0-9].*'}},
+                                   {'regexp': {'request': '.*explorer.*http.*:[0-9].*'}},
+                                   {'regexp': {'request': '.*certutil.*http.*:[0-9].*'}},
+                                   {'regexp': {'request': '.*Wscript.*http.*:[0-9].*'}},
+                                   {'regexp': {'request': '.*getstore.*http.*:[0-9].*'}},
+                                   {'regexp': {'request': '.*HTTP.start.*http.*:[0-9].*'}},
+                                   {'regexp': {'request': '.*lwp-download.*http.*:[0-9].*'}},
+                                   {'regexp': {'request': '.*objXMLHTTP.*http.*:[0-9].*'}},
+                                   {'regexp': {'request': '.*mshta.*http.*:[0-9].*'}}
+                               ],
+                               'must_not':
+                                   {'terms': {'source_ip': [ip_string]}}}}}}}
+
         result = es.search(index="xpot_accesslog-2021.01", body=query, size=1)
         if len(result["hits"]["hits"]) == 0:
             break
         log = result["hits"]["hits"][0]
-        ip_string = ip_string + ", '" + log["_source"]["source_ip"] + "'"
+        if ip_string=='':
+            ip_string = +log["_source"]["source_ip"]
+        else:
+            ip_string = ip_string + ", " + log["_source"]["source_ip"]
         print(ip_string)
         input()
         ip_string
         list1.append(log["_source"]["source_ip"])
     badip_list_bp = badip_list
     list1 = []
-    for badip in  badip_list:
+    for badip in badip_list:
         query = {'query': {'bool':
                                {'must':
                                     [{'term': {'@timestamp': '2021-01-17'}},
                                      {'term': {'source_ip': badip}}],
-                                    'must_not': [
-                                        {'regexp': {'request': '.*wget.*http.*:[0-9].*'}},
-                                        {'regexp': {'request': '.*curl.*http.*:[0-9].*'}},
-                                        {'regexp': {'request': '.*fetch.*http.*:[0-9].*'}},
-                                        {'regexp': {'request': '.*java.net.URL.*http.*:[0-9].*',}},
-                                        {'regexp': {'request': '.*urlopen.*http.*:[0-9].*'}},
-                                        {'regexp': {'request': '.*bitsadmin.*http.*:[0-9].*'}},
-                                        {'regexp': {'request': '.*explorer.*http.*:[0-9].*'}},
-                                        {'regexp': {'request': '.*certutil.*http.*:[0-9].*'}},
-                                        {'regexp': {'request': '.*Wscript.*http.*:[0-9].*'}},
-                                        {'regexp': {'request': '.*getstore.*http.*:[0-9].*'}},
-                                        {'regexp': {'request': '.*HTTP.start.*http.*:[0-9].*'}},
-                                        {'regexp': {'request': '.*lwp-download.*http.*:[0-9].*'}},
-                                        {'regexp': {'request': '.*objXMLHTTP.*http.*:[0-9].*'}},
-                                        {'regexp': {'request': '.*mshta.*http.*:[0-9].*'}}
-                                    ]}}}
+                                'must_not': [
+                                    {'regexp': {'request': '.*wget.*http.*:[0-9].*'}},
+                                    {'regexp': {'request': '.*curl.*http.*:[0-9].*'}},
+                                    {'regexp': {'request': '.*fetch.*http.*:[0-9].*'}},
+                                    {'regexp': {'request': '.*java.net.URL.*http.*:[0-9].*', }},
+                                    {'regexp': {'request': '.*urlopen.*http.*:[0-9].*'}},
+                                    {'regexp': {'request': '.*bitsadmin.*http.*:[0-9].*'}},
+                                    {'regexp': {'request': '.*explorer.*http.*:[0-9].*'}},
+                                    {'regexp': {'request': '.*certutil.*http.*:[0-9].*'}},
+                                    {'regexp': {'request': '.*Wscript.*http.*:[0-9].*'}},
+                                    {'regexp': {'request': '.*getstore.*http.*:[0-9].*'}},
+                                    {'regexp': {'request': '.*HTTP.start.*http.*:[0-9].*'}},
+                                    {'regexp': {'request': '.*lwp-download.*http.*:[0-9].*'}},
+                                    {'regexp': {'request': '.*objXMLHTTP.*http.*:[0-9].*'}},
+                                    {'regexp': {'request': '.*mshta.*http.*:[0-9].*'}}
+                                ]}}}
         result = es.search(index="xpot_accesslog-2021.01", body=query, size=1)
-        if len(result["hits"]["hits"])!=0:
+        if len(result["hits"]["hits"]) != 0:
             list1.append(badip)
             badip_list.remove(badip)
     print(list1)
@@ -88,7 +92,7 @@ def get_badip():
 def get_path(a, ip):
     global badip_list
     # パス種類判断
-    while len(result)!=0:
+    while len(result) != 0:
         query = {
             'query':
                 {'bool': {
@@ -115,8 +119,8 @@ def get_path(a, ip):
             a.requestq = a.requestq + ",'" + kaka + "'"
             a.requests.append(kaka)
             print(a.requestq)
-            j=1
-            if count!=0:
+            j = 1
+            if count != 0:
                 print("同じ脆弱性複数の場合、ここで0を入力してください,違うの場合は1")
                 j = input()
             if j == 1:
@@ -218,7 +222,7 @@ def get_deip():
     print("複数ソースから同じハニーポットを狙う特徴があるのか？一番多いのハニーポットIpを入力してください")
     kip = input()
     if kip == '':
-        get_deport("0", ip_list_bk,  output_list, kip)
+        get_deport("0", ip_list_bk, output_list, kip)
     else:
         for index in range(len(ip_list_bk)):
             if ip_list_bk[index].destination_ip != kip:
@@ -231,7 +235,7 @@ def group_analysis1(a, group):
     global badip_list
     # パス一種類のみ
     if group == "bad":
-        for badip in  badip_list:
+        for badip in badip_list:
             query = {'query': {
                 'bool': {'must': [{'term': {'@timestamp': '2021-01-17'}}, {'match_phrase': {'request': a.requests[0]}},
                                   {'term': {'source_ip': badip}}
@@ -246,7 +250,7 @@ def group_analysis1(a, group):
                 ipcount = ipcount + 1
         get_deip()
         for index in range(len(ip_list)):
-             badip_list.remove(ip_list[index].source_ip)
+            badip_list.remove(ip_list[index].source_ip)
     if group == "not bad":
         query = {
             'query':
@@ -368,76 +372,76 @@ def group_analysis2(a, group):
         print(ipl)
         print(a.requests)
     else:
-        ncount=0
+        ncount = 0
         query = {
             'query':
                 {'bool':
-                    {'must':
-                        {'term': {'@timestamp': '2021-01-17'}},
-                     'should':
-                        {'terms': {'request': a.requestq}},
-                     'must_not': [
-                            {'terms': {
-                                "source_ip": ['185.163.109.66 ', '198.20.69.74 ', '198.20.69.98 ', '198.20.87.98 ',
-                                              '198.20.99.130 ', '198.20.70.114 ', '66.240.192.138 ',
-                                              '66.240.205.34 ',
-                                              '66.240.219.146 ', '66.240.236.119 ', '71.6.135.131 ',
-                                              '71.6.146.185 ',
-                                              '71.6.146.186 ', '71.6.158.166 ', '71.6.165.200 ', '71.6.167.142 ',
-                                              '80.82.77.139 ',
-                                              '80.82.77.33 ', '82.221.105.6 ', '82.221.105.7 ', '89.248.167.131 ',
-                                              '89.248.172.16 ', '93.120.27.62 ', '93.174.95.106 ',
-                                              '94.102.49.190 ',
-                                              '94.102.49.193 ''162.142.125.53',
-                                              '162.142.125.54', '162.142.125.55', '162.142.125.56',
-                                              '162.142.125.39', '162.142.125.38', '162.142.125.37',
-                                              '162.142.125.40',
-                                              '162.142.125.60', '162.142.125.59', '162.142.125.57',
-                                              '162.142.125.43',
-                                              '162.142.125.41', '162.142.125.58', '162.142.125.44',
-                                              '162.142.125.42',
-                                              '162.142.125.196', '162.142.125.194', '162.142.125.193',
-                                              '162.142.125.195',
-                                              '162.142.125.96', '74.120.14.56', '74.120.14.55', '74.120.14.54',
-                                              '74.120.14.38',
-                                              '74.120.14.53', '74.120.14.39', '74.120.14.40', '167.248.133.56',
-                                              '167.248.133.40',
-                                              '167.248.133.53', '74.120.14.37', '167.248.133.38', '167.248.133.55',
-                                              '167.248.133.54', '167.248.133.39', '167.248.133.37',
-                                              '167.248.133.59',
-                                              '167.248.133.42', '167.248.133.43', '167.248.133.44',
-                                              '167.248.133.58',
-                                              '167.248.133.41', '167.248.133.57', '167.248.133.60',
-                                              '167.248.133.114',
-                                              '167.248.133.116', '167.248.133.113', '167.248.133.115',
-                                              '167.94.138.59',
-                                              '167.94.138.44', '167.94.138.58', '167.94.138.43', '167.94.138.41',
-                                              '167.94.138.60', '167.94.138.57', '167.94.138.42', '167.94.138.114',
-                                              '167.94.138.116', '167.94.138.113', '167.94.138.115', '74.120.14.43',
-                                              '74.120.14.57', '74.120.14.59', '74.120.14.44', '74.120.14.42',
-                                              '74.120.14.113', '74.120.14.41', '74.120.14.60', '74.120.14.115',
-                                              '74.120.14.114', '74.120.14.58', '74.120.14.116', '162.142.125.121',
-                                              '31.44.185.57', '31.44.185.115', '167.94.146.57', '167.94.145.58',
-                                              '167.94.146.59', '167.94.146.60', '167.94.145.59', '167.94.145.60',
-                                              '167.94.145.57', '167.94.146.58', '91.243.46.122', '192.35.168.240',
-                                              '162.142.125.33', '162.142.125.34', '162.142.125.35',
-                                              '162.142.125.36',
-                                              '167.94.138.2', '178.57.220.188', '163.172.164.243',
-                                              '167.248.133.96',
-                                              '74.120.14.96', '185.220.101.51', '46.254.20.36', '185.220.100.252',
-                                              '162.142.125.128']}},  # shodan and censys
+                     {'must':
+                          {'term': {'@timestamp': '2021-01-17'}},
+                      'should':
+                          {'terms': {'request': a.requestq}},
+                      'must_not': [
+                          {'terms': {
+                              "source_ip": ['185.163.109.66 ', '198.20.69.74 ', '198.20.69.98 ', '198.20.87.98 ',
+                                            '198.20.99.130 ', '198.20.70.114 ', '66.240.192.138 ',
+                                            '66.240.205.34 ',
+                                            '66.240.219.146 ', '66.240.236.119 ', '71.6.135.131 ',
+                                            '71.6.146.185 ',
+                                            '71.6.146.186 ', '71.6.158.166 ', '71.6.165.200 ', '71.6.167.142 ',
+                                            '80.82.77.139 ',
+                                            '80.82.77.33 ', '82.221.105.6 ', '82.221.105.7 ', '89.248.167.131 ',
+                                            '89.248.172.16 ', '93.120.27.62 ', '93.174.95.106 ',
+                                            '94.102.49.190 ',
+                                            '94.102.49.193 ''162.142.125.53',
+                                            '162.142.125.54', '162.142.125.55', '162.142.125.56',
+                                            '162.142.125.39', '162.142.125.38', '162.142.125.37',
+                                            '162.142.125.40',
+                                            '162.142.125.60', '162.142.125.59', '162.142.125.57',
+                                            '162.142.125.43',
+                                            '162.142.125.41', '162.142.125.58', '162.142.125.44',
+                                            '162.142.125.42',
+                                            '162.142.125.196', '162.142.125.194', '162.142.125.193',
+                                            '162.142.125.195',
+                                            '162.142.125.96', '74.120.14.56', '74.120.14.55', '74.120.14.54',
+                                            '74.120.14.38',
+                                            '74.120.14.53', '74.120.14.39', '74.120.14.40', '167.248.133.56',
+                                            '167.248.133.40',
+                                            '167.248.133.53', '74.120.14.37', '167.248.133.38', '167.248.133.55',
+                                            '167.248.133.54', '167.248.133.39', '167.248.133.37',
+                                            '167.248.133.59',
+                                            '167.248.133.42', '167.248.133.43', '167.248.133.44',
+                                            '167.248.133.58',
+                                            '167.248.133.41', '167.248.133.57', '167.248.133.60',
+                                            '167.248.133.114',
+                                            '167.248.133.116', '167.248.133.113', '167.248.133.115',
+                                            '167.94.138.59',
+                                            '167.94.138.44', '167.94.138.58', '167.94.138.43', '167.94.138.41',
+                                            '167.94.138.60', '167.94.138.57', '167.94.138.42', '167.94.138.114',
+                                            '167.94.138.116', '167.94.138.113', '167.94.138.115', '74.120.14.43',
+                                            '74.120.14.57', '74.120.14.59', '74.120.14.44', '74.120.14.42',
+                                            '74.120.14.113', '74.120.14.41', '74.120.14.60', '74.120.14.115',
+                                            '74.120.14.114', '74.120.14.58', '74.120.14.116', '162.142.125.121',
+                                            '31.44.185.57', '31.44.185.115', '167.94.146.57', '167.94.145.58',
+                                            '167.94.146.59', '167.94.146.60', '167.94.145.59', '167.94.145.60',
+                                            '167.94.145.57', '167.94.146.58', '91.243.46.122', '192.35.168.240',
+                                            '162.142.125.33', '162.142.125.34', '162.142.125.35',
+                                            '162.142.125.36',
+                                            '167.94.138.2', '178.57.220.188', '163.172.164.243',
+                                            '167.248.133.96',
+                                            '74.120.14.96', '185.220.101.51', '46.254.20.36', '185.220.100.252',
+                                            '162.142.125.128']}},  # shodan and censys
 
-                            {'terms':
-                                 {'request': ['HEAD / HTTP/1.0', 'HEAD / HTTP/1.1', 'POST / HTTP/1.0',
-                                              'POST / HTTP/1.1',
-                                              'GET / HTTP/1.0', 'GET / HTTP/1.1', '/favicon.ico', '/.env', '/Nmap',
-                                              'OPTIONS / HTTP/1.0', 'OPTIONS / HTTP/1.1', 'GET /version HTTP/1.1']
-                                  }
-                             }
-                        ],
-                     'must_not': {'terms': {'source_ip': [ip_string]}}
-                    }
-                }
+                          {'terms':
+                               {'request': ['HEAD / HTTP/1.0', 'HEAD / HTTP/1.1', 'POST / HTTP/1.0',
+                                            'POST / HTTP/1.1',
+                                            'GET / HTTP/1.0', 'GET / HTTP/1.1', '/favicon.ico', '/.env', '/Nmap',
+                                            'OPTIONS / HTTP/1.0', 'OPTIONS / HTTP/1.1', 'GET /version HTTP/1.1']
+                                }
+                           }
+                      ],
+                      'must_not': {'terms': {'source_ip': [ip_string]}}
+                      }
+                 }
         }
         result = es.search(index="xpot_accesslog-2021.01", body=query, size=1)
         if result != '':
@@ -526,11 +530,11 @@ def get_ip2():
     return sip
 
 
-def get_path2(a,sip):
+def get_path2(a, sip):
     global badip_list
     global flag2
     result = 1
-    while len(result)!=0:
+    while len(result) != 0:
         query = {
             'query':
                 {'bool': {
@@ -548,7 +552,6 @@ def get_path2(a,sip):
         result = es.search(index="xpot_accesslog-2021.01", body=query, size=1)
         result2 = es.search(index="xpot_accesslog-2021.01", body=query, size=2000)
         if len(result["hits"]["hits"]) < 30:
-
             flag2 = 1
         if (result["hits"]["hits"][0]["_source"]["request"]) != '':
             print(result["hits"]["hits"][0]["_source"]["request"])
@@ -569,7 +572,7 @@ def get_path2(a,sip):
 
 
 if __name__ == "__main__":
-    
+
     global badip_list
     badip_list = []
     global badip_list_bp
@@ -583,7 +586,7 @@ if __name__ == "__main__":
     global output_list
     output_list = []
     global count
-    count =0
+    count = 0
     ipcount = 0
     global ip_string
     ip_string = "''"
@@ -595,9 +598,9 @@ if __name__ == "__main__":
     flag2 = 0
     get_badip()
     print(badip_list)  # !!!!!!!!
-    for badip in  badip_list:
+    for badip in badip_list:
         a = Requests()
-        a.requestq=''
+        a.requestq = ''
         ip_list = []
         output_list = []
         a = get_path(a, badip)
@@ -610,9 +613,9 @@ if __name__ == "__main__":
             ip_list.append(a)
             ipcount = ipcount + 1
             group_analysis2(a, "bad")
-    #get_onerequest()
+    # get_onerequest()
     loopcount = 0
-    while (loopcount < 3 and flag1 == 0 and  flag2 == 0):
+    while (loopcount < 3 and flag1 == 0 and flag2 == 0):
         a = Requests()
         ip_list = []
         output_list = []
@@ -629,7 +632,6 @@ if __name__ == "__main__":
             ip_list.append(a)
             ipcount = ipcount + 1
             group_analysis2(a, "not bad")
-
 
     query = {
         'query':
@@ -698,7 +700,7 @@ if __name__ == "__main__":
                   }
              }
     }
-    remainder= []
+    remainder = []
     result = es.search(index="xpot_accesslog-2021.01", body=query, size=10000)
     for log in result["hits"]["hits"]:
         c = Requests()
@@ -706,18 +708,5 @@ if __name__ == "__main__":
         c.requests.append(log["_source"]["request"])
         remainder.append(c)
         c = ''
-    remainder= set(remainder)
+    remainder = set(remainder)
     print(remainder)
-
-
-
-
-
-
-
-
-
-
-
-
-
