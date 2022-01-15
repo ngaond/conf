@@ -9,7 +9,7 @@ class Requests(object):
         self.source_ip = ''
         self.destination_ip = []
         self.destination_port = []
-        #self.requestq = ''
+        # self.requestq = ''
         self.requests = []
 
 
@@ -18,7 +18,7 @@ def get_badip():
     global ip_string
     global badip_list_bp
     list1 = []
-    ip_string=[]
+    ip_string = []
     # 悪意フラグリクエスト抽出
     while True:
         query = {'query':
@@ -48,7 +48,7 @@ def get_badip():
             break
         log = result["hits"]["hits"][0]
         ip_string.append(log["_source"]["source_ip"])
-        list1.append(log["_source"]["source_ip"])
+        badip_list.append(log["_source"]["source_ip"])
     badip_list_bp = badip_list
     list1 = []
     for badip in badip_list:
@@ -107,9 +107,9 @@ def get_path(a, ip):
             print(result["hits"]["hits"][0]["_source"]["request"])
             print("パスやパラメータなどリクエストの特徴を入力ください")
             kaka = input()
-            #a.requestq = a.requestq + ",'" + kaka + "'"
+            # a.requestq = a.requestq + ",'" + kaka + "'"
             a.requests.append(kaka)
-            #print(a.requestq)
+            # print(a.requestq)
             j = 1
             if count != 0:
                 print("同じ脆弱性複数の場合、ここで0を入力してください,違うの場合は1")
@@ -224,6 +224,7 @@ def get_deip():
 def group_analysis1(a, group):
     global ip_string
     global badip_list
+    global count
     # パス一種類のみ
     if group == "bad":
         for badip in badip_list:
@@ -235,7 +236,8 @@ def group_analysis1(a, group):
             }}
             result = es.search(index="xpot_accesslog-2021.01", body=query, size=1)
             b = Requests()
-            b = get_path(b, result["hits"]["hits"][0]["_source"]["source_ip"])
+            count = 0
+            b = get_path(b, badip)
             if count == 1:
                 ip_list.append(b)
                 ipcount = ipcount + 1
@@ -503,9 +505,10 @@ def get_ip2():
                                                '162.142.125.128']}},  # shodan and censys
 
                       {'terms':
-                           {'request': ['HEAD / HTTP/1.0', 'HEAD / HTTP/1.1', 'POST / HTTP/1.0', 'POST / HTTP/1.1',
-                                        'GET / HTTP/1.0', 'GET / HTTP/1.1', '/favicon.ico', '/.env', '/Nmap',
-                                        'OPTIONS / HTTP/1.0', 'OPTIONS / HTTP/1.1', 'GET /version HTTP/1.1']
+                           {'request.keyword': ['HEAD / HTTP/1.0', 'HEAD / HTTP/1.1', 'POST / HTTP/1.0',
+                                                'POST / HTTP/1.1',
+                                                'GET / HTTP/1.0', 'GET / HTTP/1.1', '/favicon.ico', '/.env', '/Nmap',
+                                                'OPTIONS / HTTP/1.0', 'OPTIONS / HTTP/1.1', 'GET /version HTTP/1.1']
                             }
                        }
                   ],
@@ -533,9 +536,7 @@ def get_path2(a, sip):
                         {'term': {'@timestamp': '2021-01-17'}}, {'term': {'source_ip': sip}}
                     ],
                     'must_not':
-                        {'terms': {'request': a.requests}
-
-                         }
+                        {'terms': {'request': a.requests}}
 
                 }
                 }
@@ -549,7 +550,7 @@ def get_path2(a, sip):
             print(result["hits"]["hits"][0]["_source"]["request"])
             print("パスやパラメータなどリクエストの特徴を入力ください")
             kaka = input()
-            #a.requestq = a.requestq + ",'" + kaka + "'"
+            # a.requestq = a.requestq + ",'" + kaka + "'"
             j = 1
             if count != 0:
                 print("同じ脆弱性複数の場合、ここで0を入力してください,違うの場合は1")
@@ -590,11 +591,14 @@ if __name__ == "__main__":
     global flag2
     flag2 = 0
     get_badip()
-    print(badip_list)  # !!!!!!!!
     for badip in badip_list:
         a = Requests()
-        #a.requestq = ''
+        a.requests=[]
+        a.source_ip=[]
+        a.destination_ip= []
+        # a.requestq = ''
         ip_list = []
+        count = 0
         output_list = []
         a = get_path(a, badip)
         ipcount = 0
@@ -608,8 +612,9 @@ if __name__ == "__main__":
             group_analysis2(a, "bad")
     # get_onerequest()
     loopcount = 0
-    while (loopcount < 3 and flag1 == 0 and flag2 == 0):
+    while 0#(loopcount < 3 and flag1 == 0 and flag2 == 0):
         a = Requests()
+        count = 0
         ip_list = []
         output_list = []
         a = get_path2(a, (get_ip2()))
