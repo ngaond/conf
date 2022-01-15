@@ -78,8 +78,8 @@ def get_badip():
                                         {'regexp': {'request': '.*mshta.*http.*:[0-9].*'}}
                                     ]}}}
         result = es.search(index="xpot_accesslog-2021.01", body=query, size=1)
-        list1.append(result["hits"]["hits"]["_source"]["source_ip"])
-        badip_list.remove(result["hits"]["hits"]["_source"]["source_ip"])
+        list1.append(result["hits"]["hits"][0]["_source"]["source_ip"])
+        badip_list.remove(result["hits"]["hits"][0]["_source"]["source_ip"])
 
 
 def get_path(a, ip):
@@ -106,7 +106,7 @@ def get_path(a, ip):
         }
         result = es.search(index="xpot_accesslog-2021.01", body=query, size=1)
         if (len(result)) != 0:
-            print(result["hits"]["hits"]["_source"]["request"])
+            print(result["hits"]["hits"][0]["_source"]["request"])
             print("パスやパラメータなどリクエストの特徴を入力ください")
             kaka = input()
             requestq = requestq + ",'" + kaka + "'"
@@ -115,8 +115,8 @@ def get_path(a, ip):
             j = input()
             if j == 1:
                 a.rlist.append(kaka)
-                a.destination_port.append(result["hits"]["hits"]["_source"]["destination_port"])
-                a.destination_ip.append(result["hits"]["hits"]["_source"]["destination_ip"])
+                a.destination_port.append(result["hits"]["hits"][0]["_source"]["destination_port"])
+                a.destination_ip.append(result["hits"]["hits"][0]["_source"]["destination_ip"])
                 a.source_ip = badip
                 count = count + 1
                 badip_list.remove(a.source_ip)
@@ -234,7 +234,7 @@ def group_analysis1(a, group):
             }}
             result = es.search(index="xpot_accesslog-2021.01", body=query, size=1)
             b = Requests()
-            b = get_path(b, result["hits"]["hits"]["_source"]["source_ip"])
+            b = get_path(b, result["hits"]["hits"][0]["_source"]["source_ip"])
             if count == 1:
                 ip_list.append(b)
                 ipcount = ipcount + 1
@@ -313,7 +313,7 @@ def group_analysis1(a, group):
         }
         result = es.search(index="xpot_accesslog-2021.01", body=query, size=1)
         b = Requests()
-        b = get_path2(b, result["hits"]["hits"]["_source"]["source_ip"])
+        b = get_path2(b, result["hits"]["hits"][0]["_source"]["source_ip"])
         if count == 1:
             ip_list.append(b)
             ip_string = ip_string + ", '" + b.source_ip + "'"
@@ -516,7 +516,7 @@ def get_ip2():
     result1 = es.search(index="xpot_accesslog-2021.01", body=query, size=2000)
     if len(result1["hits"]["hits"]) < 2000:
         flag1 = 1
-    sip = result["hits"]["hits"]["_source"]["source_ip"]
+    log = result["hits"]["hits"][0]["_source"]["source_ip"]
     return sip
 
 
@@ -543,8 +543,8 @@ def get_path2(a,sip):
         if len(result["hits"]["hits"]) < 30:
 
             flag2 = 1
-        if (result["hits"]["hits"]["_source"]["request"]) != '':
-            print(result["hits"]["hits"]["_source"]["request"])
+        if (result["hits"]["hits"][0]["_source"]["request"]) != '':
+            print(result["hits"]["hits"][0]["_source"]["request"])
             print("パスやパラメータなどリクエストの特徴を入力ください")
             kaka = input()
             requestq = requestq + ",'" + kaka + "'"
@@ -553,8 +553,8 @@ def get_path2(a,sip):
             j = input()
             if j == 1:
                 a.rlist.append(kaka)
-                a.destination_port.append(result["hits"]["hits"]["_source"]["destination_port"])
-                a.destination_ip.append(result["hits"]["hits"]["_source"]["destination_ip"])
+                a.destination_port.append(result["hits"]["hits"][0]["_source"]["destination_port"])
+                a.destination_ip.append(result["hits"]["hits"][0]["_source"]["destination_ip"])
                 a.source_ip = badip
                 count = count + 1
                 badip_list.remove(a.source_ip)
