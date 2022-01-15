@@ -20,26 +20,26 @@ def get_badip():
     list1 = []
     ip_string = []
     # 悪意フラグリクエスト抽出
-    while True:
+    while len(ip_string)<220:
         query = {'query':
                      {'bool':
                           {'must':
                                {'term': {'@timestamp': '2021-01-17'}},
                            'should': [
-                               {'regexp': {'request': '.*wget.*http.*:[0-9].*'}},
-                               {'regexp': {'request': '.*curl.*http.*:[0-9].*'}},
-                               {'regexp': {'request': '.*fetch.*http.*:[0-9].*'}},
-                               {'regexp': {'request': '.*java.net.URL.*http.*:[0-9].*'}},
-                               {'regexp': {'request': '.*urlopen.*http.*:[0-9].*'}},
-                               {'regexp': {'request': '.*bitsadmin.*http.*:[0-9].*'}},
-                               {'regexp': {'request': '.*explorer.*http.*:[0-9].*'}},
-                               {'regexp': {'request': '.*certutil.*http.*:[0-9].*'}},
-                               {'regexp': {'request': '.*Wscript.*http.*:[0-9].*'}},
-                               {'regexp': {'request': '.*getstore.*http.*:[0-9].*'}},
-                               {'regexp': {'request': '.*HTTP.start.*http.*:[0-9].*'}},
-                               {'regexp': {'request': '.*lwp-download.*http.*:[0-9].*'}},
-                               {'regexp': {'request': '.*objXMLHTTP.*http.*:[0-9].*'}},
-                               {'regexp': {'request': '.*mshta.*http.*:[0-9].*'}}
+                               {'regexp': {'request.keyword': '.*wget.*http.*:[0-9].*'}},
+                               {'regexp': {'request.keyword': '.*curl.*http.*:[0-9].*'}},
+                               {'regexp': {'request.keyword': '.*fetch.*http.*:[0-9].*'}},
+                               {'regexp': {'request.keyword': '.*java.net.URL.*http.*:[0-9].*'}},
+                               {'regexp': {'request.keyword': '.*urlopen.*http.*:[0-9].*'}},
+                               {'regexp': {'request.keyword': '.*bitsadmin.*http.*:[0-9].*'}},
+                               {'regexp': {'request.keyword': '.*explorer.*http.*:[0-9].*'}},
+                               {'regexp': {'request.keyword': '.*certutil.*http.*:[0-9].*'}},
+                               {'regexp': {'request.keyword': '.*Wscript.*http.*:[0-9].*'}},
+                               {'regexp': {'request.keyword': '.*getstore.*http.*:[0-9].*'}},
+                               {'regexp': {'request.keyword': '.*HTTP.start.*http.*:[0-9].*'}},
+                               {'regexp': {'request.keyword': '.*lwp-download.*http.*:[0-9].*'}},
+                               {'regexp': {'request.keyword': '.*objXMLHTTP.*http.*:[0-9].*'}},
+                               {'regexp': {'request.keyword': '.*mshta.*http.*:[0-9].*'}}
                            ],
                            'must_not':
                                {'terms': {'source_ip': ip_string}}}}}
@@ -57,33 +57,41 @@ def get_badip():
                                     [{'term': {'@timestamp': '2021-01-17'}},
                                      {'term': {'source_ip': badip}}],
                                 'must_not': [
-                                    {'regexp': {'request': '.*wget.*http.*:[0-9].*'}},
-                                    {'regexp': {'request': '.*curl.*http.*:[0-9].*'}},
-                                    {'regexp': {'request': '.*fetch.*http.*:[0-9].*'}},
-                                    {'regexp': {'request': '.*java.net.URL.*http.*:[0-9].*', }},
-                                    {'regexp': {'request': '.*urlopen.*http.*:[0-9].*'}},
-                                    {'regexp': {'request': '.*bitsadmin.*http.*:[0-9].*'}},
-                                    {'regexp': {'request': '.*explorer.*http.*:[0-9].*'}},
-                                    {'regexp': {'request': '.*certutil.*http.*:[0-9].*'}},
-                                    {'regexp': {'request': '.*Wscript.*http.*:[0-9].*'}},
-                                    {'regexp': {'request': '.*getstore.*http.*:[0-9].*'}},
-                                    {'regexp': {'request': '.*HTTP.start.*http.*:[0-9].*'}},
-                                    {'regexp': {'request': '.*lwp-download.*http.*:[0-9].*'}},
-                                    {'regexp': {'request': '.*objXMLHTTP.*http.*:[0-9].*'}},
-                                    {'regexp': {'request': '.*mshta.*http.*:[0-9].*'}}
-                                ]}}}
+                                    {'regexp': {'request.keyword': '.*wget.*http.*:[0-9].*'}},
+                                    {'regexp': {'request.keyword': '.*curl.*http.*:[0-9].*'}},
+                                    {'regexp': {'request.keyword': '.*fetch.*http.*:[0-9].*'}},
+                                    {'regexp': {'request.keyword': '.*java.net.URL.*http.*:[0-9].*', }},
+                                    {'regexp': {'request.keyword': '.*urlopen.*http.*:[0-9].*'}},
+                                    {'regexp': {'request.keyword': '.*bitsadmin.*http.*:[0-9].*'}},
+                                    {'regexp': {'request.keyword': '.*explorer.*http.*:[0-9].*'}},
+                                    {'regexp': {'request.keyword': '.*certutil.*http.*:[0-9].*'}},
+                                    {'regexp': {'request.keyword': '.*Wscript.*http.*:[0-9].*'}},
+                                    {'regexp': {'request.keyword': '.*getstore.*http.*:[0-9].*'}},
+                                    {'regexp': {'request.keyword': '.*HTTP.start.*http.*:[0-9].*'}},
+                                    {'regexp': {'request.keyword': '.*lwp-download.*http.*:[0-9].*'}},
+                                    {'regexp': {'request.keyword': '.*objXMLHTTP.*http.*:[0-9].*'}},
+                                    {'regexp': {'request.keyword': '.*mshta.*http.*:[0-9].*'}},
+                                    {'terms': {
+                                        'request.keyword': ['HEAD / HTTP/1.0', 'HEAD / HTTP/1.1', 'POST / HTTP/1.0',
+                                                            'POST / HTTP/1.1', 'GET / HTTP/1.0', 'GET / HTTP/1.1',
+                                                            '/favicon.ico',
+                                                            '/.env', '/Nmap', 'OPTIONS / HTTP/1.0',
+                                                            'OPTIONS / HTTP/1.1',
+                                                            'GET /version HTTP/1.1'
+                                                            ]}}]}}}
         result = es.search(index="xpot_accesslog-2021.01", body=query, size=1)
         if len(result["hits"]["hits"]) != 0:
             list1.append(badip)
             badip_list.remove(badip)
-    print(list1)
-    print(ip_string)
+    print(len(list1))
+    print(len(ip_string))
 
 
 def get_path(a, ip):
     global badip_list
+    m = 1
     # パス種類判断
-    while len(result) != 0:
+    while m != 0:
         query = {
             'query':
                 {'bool': {
@@ -91,19 +99,21 @@ def get_path(a, ip):
                         {'term': {'@timestamp': '2021-01-17'}}, {'term': {'source_ip': ip}}
                     ],
                     'must_not': [
-                        {'terms': {'request': a.requests}},
-                        {'terms': {'request': ['HEAD / HTTP/1.0', 'HEAD / HTTP/1.1', 'POST / HTTP/1.0',
-                                               'POST / HTTP/1.1', 'GET / HTTP/1.0', 'GET / HTTP/1.1', '/favicon.ico',
-                                               '/.env', '/Nmap', 'OPTIONS / HTTP/1.0', 'OPTIONS / HTTP/1.1',
-                                               'GET /version HTTP/1.1'
-                                               ]}
+                        {'terms': {'request.keyword': a.requests}},
+                        {'terms': {'request.keyword': ['HEAD / HTTP/1.0', 'HEAD / HTTP/1.1', 'POST / HTTP/1.0',
+                                                       'POST / HTTP/1.1', 'GET / HTTP/1.0', 'GET / HTTP/1.1',
+                                                       '/favicon.ico',
+                                                       '/.env', '/Nmap', 'OPTIONS / HTTP/1.0', 'OPTIONS / HTTP/1.1',
+                                                       'GET /version HTTP/1.1'
+                                                       ]}
                          }
                     ]
                 }
                 }
         }
         result = es.search(index="xpot_accesslog-2021.01", body=query, size=1)
-        if (len(result)) != 0:
+        m = len(result["hits"]["hits"])
+        if (m) != 0:
             print(result["hits"]["hits"][0]["_source"]["request"])
             print("パスやパラメータなどリクエストの特徴を入力ください")
             kaka = input()
@@ -229,7 +239,8 @@ def group_analysis1(a, group):
     if group == "bad":
         for badip in badip_list:
             query = {'query': {
-                'bool': {'must': [{'term': {'@timestamp': '2021-01-17'}}, {'match_phrase': {'request': a.requests[0]}},
+                'bool': {'must': [{'term': {'@timestamp': '2021-01-17'}},
+                                  {'match_phrase': {'request.keyword': a.requests[0]}},
                                   {'term': {'source_ip': badip}}
                                   ]
                          }
@@ -250,7 +261,7 @@ def group_analysis1(a, group):
                 {'bool':
                     {'must': [
                         {'term': {'@timestamp': '2021-01-17'}},
-                        {'match_phrase': {'request': a.requests[0]}}],
+                        {'match_phrase': {'request.keyword': a.requests[0]}}],
                         'must_not': [
                             {'terms': {
                                 "source_ip": ['185.163.109.66 ', '198.20.69.74 ', '198.20.69.98 ', '198.20.87.98 ',
@@ -303,10 +314,12 @@ def group_analysis1(a, group):
                                               '162.142.125.128']}},  # shodan and censys
 
                             {'terms':
-                                 {'request': ['HEAD / HTTP/1.0', 'HEAD / HTTP/1.1', 'POST / HTTP/1.0',
-                                              'POST / HTTP/1.1',
-                                              'GET / HTTP/1.0', 'GET / HTTP/1.1', '/favicon.ico', '/.env', '/Nmap',
-                                              'OPTIONS / HTTP/1.0', 'OPTIONS / HTTP/1.1', 'GET /version HTTP/1.1']
+                                 {'request.keyword': ['HEAD / HTTP/1.0', 'HEAD / HTTP/1.1', 'POST / HTTP/1.0',
+                                                      'POST / HTTP/1.1',
+                                                      'GET / HTTP/1.0', 'GET / HTTP/1.1', '/favicon.ico', '/.env',
+                                                      '/Nmap',
+                                                      'OPTIONS / HTTP/1.0', 'OPTIONS / HTTP/1.1',
+                                                      'GET /version HTTP/1.1']
                                   }
                              }
                         ],
@@ -333,7 +346,7 @@ def group_analysis2(a, group):
             query = {'query': {
                 'bool': {'must': [{'term': {'@timestamp': '2021-01-17'}}, {'term': {'source_ip': badip}}
                                   ],
-                         'should': {'terms': {'request': a.requests}},
+                         'should': {'terms': {'request.keyword': a.requests}},
                          }
             }}
             result = es.search(index="xpot_accesslog-2021.01", body=query, size=1)
@@ -344,7 +357,7 @@ def group_analysis2(a, group):
                     query = {'query': {
                         'bool': {'must': [{'term': {'@timestamp': '2021-01-17'}}, {'term': {'source_ip': badip}}
                                           ],
-                                 'should': {'terms': {'request': a.requests[index]}},
+                                 'should': {'terms': {'request.keyword': a.requests[index]}},
                                  }
                     }}
                     result = es.search(index="xpot_accesslog-2021.01", body=query, size=1)
@@ -372,7 +385,7 @@ def group_analysis2(a, group):
                      {'must':
                           {'term': {'@timestamp': '2021-01-17'}},
                       'should':
-                          {'terms': {'request': a.requests}},
+                          {'terms': {'request.keyword': a.requests}},
                       'must_not': [
                           {'terms': {
                               "source_ip": ['185.163.109.66 ', '198.20.69.74 ', '198.20.69.98 ', '198.20.87.98 ',
@@ -425,10 +438,11 @@ def group_analysis2(a, group):
                                             '162.142.125.128']}},  # shodan and censys
 
                           {'terms':
-                               {'request': ['HEAD / HTTP/1.0', 'HEAD / HTTP/1.1', 'POST / HTTP/1.0',
-                                            'POST / HTTP/1.1',
-                                            'GET / HTTP/1.0', 'GET / HTTP/1.1', '/favicon.ico', '/.env', '/Nmap',
-                                            'OPTIONS / HTTP/1.0', 'OPTIONS / HTTP/1.1', 'GET /version HTTP/1.1']
+                               {'request.keyword': ['HEAD / HTTP/1.0', 'HEAD / HTTP/1.1', 'POST / HTTP/1.0',
+                                                    'POST / HTTP/1.1',
+                                                    'GET / HTTP/1.0', 'GET / HTTP/1.1', '/favicon.ico', '/.env',
+                                                    '/Nmap',
+                                                    'OPTIONS / HTTP/1.0', 'OPTIONS / HTTP/1.1', 'GET /version HTTP/1.1']
                                 }
                            }
                       ],
@@ -536,7 +550,7 @@ def get_path2(a, sip):
                         {'term': {'@timestamp': '2021-01-17'}}, {'term': {'source_ip': sip}}
                     ],
                     'must_not':
-                        {'terms': {'request': a.requests}}
+                        {'terms': {'request.keyword': a.requests}}
 
                 }
                 }
@@ -593,9 +607,9 @@ if __name__ == "__main__":
     get_badip()
     for badip in badip_list:
         a = Requests()
-        a.requests=[]
-        a.source_ip=[]
-        a.destination_ip= []
+        a.requests = []
+        a.source_ip = []
+        a.destination_ip = []
         # a.requestq = ''
         ip_list = []
         count = 0
@@ -612,7 +626,8 @@ if __name__ == "__main__":
             group_analysis2(a, "bad")
     # get_onerequest()
     loopcount = 0
-    while 0#(loopcount < 3 and flag1 == 0 and flag2 == 0):
+    '''
+    while (loopcount < 3 and flag1 == 0 and flag2 == 0):
         a = Requests()
         count = 0
         ip_list = []
@@ -688,7 +703,7 @@ if __name__ == "__main__":
                                         '162.142.125.128']}},  # shodan and censys
                   'must_not':
                       {'terms':
-                           {'request': ['HEAD / HTTP/1.0', 'HEAD / HTTP/1.1', 'POST / HTTP/1.0',
+                           {'request.keyword': ['HEAD / HTTP/1.0', 'HEAD / HTTP/1.1', 'POST / HTTP/1.0',
                                         'POST / HTTP/1.1',
                                         'GET / HTTP/1.0', 'GET / HTTP/1.1', '/favicon.ico', '/.env', '/Nmap',
                                         'OPTIONS / HTTP/1.0', 'OPTIONS / HTTP/1.1', 'GET /version HTTP/1.1']
@@ -708,3 +723,4 @@ if __name__ == "__main__":
         c = ''
     remainder = set(remainder)
     print(remainder)
+'''
