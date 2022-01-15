@@ -18,42 +18,43 @@ def get_badip():
     global ip_string
     global badip_list_bp
     list1 = []
-    ip_string=''
+    ip_string=[]
     # 悪意フラグリクエスト抽出
     while True:
         query = {'query':
-                  {"filtered":
-                    {"filter":
-                         {'bool':
-                              {'must':
-                                   {'term': {'@timestamp': '2021-01-17'}},
-                               'should': [
-                                   {'regexp': {'request': '.*wget.*http.*:[0-9].*'}},
-                                   {'regexp': {'request': '.*curl.*http.*:[0-9].*'}},
-                                   {'regexp': {'request': '.*fetch.*http.*:[0-9].*'}},
-                                   {'regexp': {'request': '.*java.net.URL.*http.*:[0-9].*'}},
-                                   {'regexp': {'request': '.*urlopen.*http.*:[0-9].*'}},
-                                   {'regexp': {'request': '.*bitsadmin.*http.*:[0-9].*'}},
-                                   {'regexp': {'request': '.*explorer.*http.*:[0-9].*'}},
-                                   {'regexp': {'request': '.*certutil.*http.*:[0-9].*'}},
-                                   {'regexp': {'request': '.*Wscript.*http.*:[0-9].*'}},
-                                   {'regexp': {'request': '.*getstore.*http.*:[0-9].*'}},
-                                   {'regexp': {'request': '.*HTTP.start.*http.*:[0-9].*'}},
-                                   {'regexp': {'request': '.*lwp-download.*http.*:[0-9].*'}},
-                                   {'regexp': {'request': '.*objXMLHTTP.*http.*:[0-9].*'}},
-                                   {'regexp': {'request': '.*mshta.*http.*:[0-9].*'}}
-                               ],
-                               'must_not':
-                                   {'terms': {'source_ip': [ip_string]}}}}}}}
-
+                     {'bool':
+                          {'must':
+                               {'term': {'@timestamp': '2021-01-17'}},
+                           'should': [
+                               {'regexp': {'request': '.*wget.*http.*:[0-9].*'}},
+                               {'regexp': {'request': '.*curl.*http.*:[0-9].*'}},
+                               {'regexp': {'request': '.*fetch.*http.*:[0-9].*'}},
+                               {'regexp': {'request': '.*java.net.URL.*http.*:[0-9].*'}},
+                               {'regexp': {'request': '.*urlopen.*http.*:[0-9].*'}},
+                               {'regexp': {'request': '.*bitsadmin.*http.*:[0-9].*'}},
+                               {'regexp': {'request': '.*explorer.*http.*:[0-9].*'}},
+                               {'regexp': {'request': '.*certutil.*http.*:[0-9].*'}},
+                               {'regexp': {'request': '.*Wscript.*http.*:[0-9].*'}},
+                               {'regexp': {'request': '.*getstore.*http.*:[0-9].*'}},
+                               {'regexp': {'request': '.*HTTP.start.*http.*:[0-9].*'}},
+                               {'regexp': {'request': '.*lwp-download.*http.*:[0-9].*'}},
+                               {'regexp': {'request': '.*objXMLHTTP.*http.*:[0-9].*'}},
+                               {'regexp': {'request': '.*mshta.*http.*:[0-9].*'}}
+                           ],
+                           'must_not':
+                               {'terms': {'source_ip': ip_string}}}}}
         result = es.search(index="xpot_accesslog-2021.01", body=query, size=1)
         if len(result["hits"]["hits"]) == 0:
             break
         log = result["hits"]["hits"][0]
-        if ip_string=='':
-            ip_string = +log["_source"]["source_ip"]
+        ip_string.append(log["_source"]["source_ip"])
+    '''
+            if ip_string=='':
+            ip_string = "'"+log["_source"]["source_ip"]+"'"
         else:
-            ip_string = ip_string + ", " + log["_source"]["source_ip"]
+            ip_string = ip_string + ", '" + log["_source"]["source_ip"]+"'"
+    '''
+
         print(ip_string)
         input()
         ip_string
