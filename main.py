@@ -9,7 +9,7 @@ class Requests(object):
         self.source_ip = ''
         self.destination_ip = []
         self.destination_port = []
-        self.requestq = ''
+        #self.requestq = ''
         self.requests = []
 
 
@@ -48,16 +48,6 @@ def get_badip():
             break
         log = result["hits"]["hits"][0]
         ip_string.append(log["_source"]["source_ip"])
-    '''
-            if ip_string=='':
-            ip_string = "'"+log["_source"]["source_ip"]+"'"
-        else:
-            ip_string = ip_string + ", '" + log["_source"]["source_ip"]+"'"
-    '''
-
-        print(ip_string)
-        input()
-        ip_string
         list1.append(log["_source"]["source_ip"])
     badip_list_bp = badip_list
     list1 = []
@@ -87,7 +77,6 @@ def get_badip():
             list1.append(badip)
             badip_list.remove(badip)
     print(list1)
-    print(ip_string)
 
 
 def get_path(a, ip):
@@ -101,7 +90,7 @@ def get_path(a, ip):
                         {'term': {'@timestamp': '2021-01-17'}}, {'term': {'source_ip': ip}}
                     ],
                     'must_not': [
-                        {'terms': {'request': [a.requestq]}},
+                        {'terms': {'request': a.requests}},
                         {'terms': {'request': ['HEAD / HTTP/1.0', 'HEAD / HTTP/1.1', 'POST / HTTP/1.0',
                                                'POST / HTTP/1.1', 'GET / HTTP/1.0', 'GET / HTTP/1.1', '/favicon.ico',
                                                '/.env', '/Nmap', 'OPTIONS / HTTP/1.0', 'OPTIONS / HTTP/1.1',
@@ -117,9 +106,9 @@ def get_path(a, ip):
             print(result["hits"]["hits"][0]["_source"]["request"])
             print("パスやパラメータなどリクエストの特徴を入力ください")
             kaka = input()
-            a.requestq = a.requestq + ",'" + kaka + "'"
+            #a.requestq = a.requestq + ",'" + kaka + "'"
             a.requests.append(kaka)
-            print(a.requestq)
+            #print(a.requestq)
             j = 1
             if count != 0:
                 print("同じ脆弱性複数の場合、ここで0を入力してください,違うの場合は1")
@@ -318,7 +307,7 @@ def group_analysis1(a, group):
                                   }
                              }
                         ],
-                        'must_not': {'terms': {'source_ip': [ip_string]}}
+                        'must_not': {'terms': {'source_ip': ip_string}}
                     }
                 }
         }
@@ -327,7 +316,7 @@ def group_analysis1(a, group):
         b = get_path2(b, result["hits"]["hits"][0]["_source"]["source_ip"])
         if count == 1:
             ip_list.append(b)
-            ip_string = ip_string + ", '" + b.source_ip + "'"
+            ip_string.append(b.source_ip)
         get_deip()
 
 
@@ -341,7 +330,7 @@ def group_analysis2(a, group):
             query = {'query': {
                 'bool': {'must': [{'term': {'@timestamp': '2021-01-17'}}, {'term': {'source_ip': badip}}
                                   ],
-                         'should': {'terms': {'request': a.requestq}},
+                         'should': {'terms': {'request': a.requests}},
                          }
             }}
             result = es.search(index="xpot_accesslog-2021.01", body=query, size=1)
@@ -380,7 +369,7 @@ def group_analysis2(a, group):
                      {'must':
                           {'term': {'@timestamp': '2021-01-17'}},
                       'should':
-                          {'terms': {'request': a.requestq}},
+                          {'terms': {'request': a.requests}},
                       'must_not': [
                           {'terms': {
                               "source_ip": ['185.163.109.66 ', '198.20.69.74 ', '198.20.69.98 ', '198.20.87.98 ',
@@ -440,7 +429,7 @@ def group_analysis2(a, group):
                                 }
                            }
                       ],
-                      'must_not': {'terms': {'source_ip': [ip_string]}}
+                      'must_not': {'terms': {'source_ip': ip_string}}
                       }
                  }
         }
@@ -519,7 +508,7 @@ def get_ip2():
                             }
                        }
                   ],
-                  'must_not': {'terms': {'source_ip': [ip_string]}}
+                  'must_not': {'terms': {'source_ip': ip_string}}
                   }
              }
     }
@@ -543,7 +532,7 @@ def get_path2(a, sip):
                         {'term': {'@timestamp': '2021-01-17'}}, {'term': {'source_ip': sip}}
                     ],
                     'must_not':
-                        {'terms': {'request': [a.requestq]}
+                        {'terms': {'request': a.requests}
 
                          }
 
@@ -558,7 +547,7 @@ def get_path2(a, sip):
             print(result["hits"]["hits"][0]["_source"]["request"])
             print("パスやパラメータなどリクエストの特徴を入力ください")
             kaka = input()
-            a.requestq = a.requestq + ",'" + kaka + "'"
+            #a.requestq = a.requestq + ",'" + kaka + "'"
             a.requests.append(kaka)
             print("同じ脆弱性複数の場合、ここで0を入力してください,違うの場合は1")
             j = input()
@@ -590,7 +579,7 @@ if __name__ == "__main__":
     count = 0
     ipcount = 0
     global ip_string
-    ip_string = "''"
+    ip_string = []
     global es
     es = Elasticsearch("http://172.23.32.103:9200")
     global flag1
@@ -601,7 +590,7 @@ if __name__ == "__main__":
     print(badip_list)  # !!!!!!!!
     for badip in badip_list:
         a = Requests()
-        a.requestq = ''
+        #a.requestq = ''
         ip_list = []
         output_list = []
         a = get_path(a, badip)
@@ -627,7 +616,7 @@ if __name__ == "__main__":
             ip_list.append(a)
             ipcount = ipcount + 1
             group_analysis1(a, "not bad")
-            ip_string = ip_string + ", '" + a.source_ip + "'"
+            ip_string.append(a.source_ip)
         else:
             loopcount == 0
             ip_list.append(a)
@@ -697,7 +686,7 @@ if __name__ == "__main__":
                                         'OPTIONS / HTTP/1.0', 'OPTIONS / HTTP/1.1', 'GET /version HTTP/1.1']
                             }
                        },
-                  'must_not': {'terms': {'source_ip': [ip_string]}}
+                  'must_not': {'terms': {'source_ip': ip_string}}
                   }
              }
     }
