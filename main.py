@@ -77,6 +77,7 @@ def get_badip():
             list1.append(badip)
             badip_list.remove(badip)
     print(list1)
+    print(ip_string)
 
 
 def get_path(a, ip):
@@ -516,15 +517,15 @@ def get_ip2():
     result1 = es.search(index="xpot_accesslog-2021.01", body=query, size=2000)
     if len(result1["hits"]["hits"]) < 2000:
         flag1 = 1
-    sig = result["hits"]["hits"][0]["_source"]["source_ip"]
+    sip = result["hits"]["hits"][0]["_source"]["source_ip"]
     return sip
 
 
 def get_path2(a, sip):
     global badip_list
     global flag2
-    result = 1
-    while len(result) != 0:
+    m = 1
+    while m != 0:
         query = {
             'query':
                 {'bool': {
@@ -540,17 +541,19 @@ def get_path2(a, sip):
                 }
         }
         result = es.search(index="xpot_accesslog-2021.01", body=query, size=1)
+        m = len(result["hits"]["hits"])
         result2 = es.search(index="xpot_accesslog-2021.01", body=query, size=2000)
-        if len(result["hits"]["hits"]) < 30:
+        if len(result2["hits"]["hits"]) < 30:
             flag2 = 1
-        if (result["hits"]["hits"][0]["_source"]["request"]) != '':
+        if m != 0:
             print(result["hits"]["hits"][0]["_source"]["request"])
             print("パスやパラメータなどリクエストの特徴を入力ください")
             kaka = input()
             #a.requestq = a.requestq + ",'" + kaka + "'"
-            a.requests.append(kaka)
-            print("同じ脆弱性複数の場合、ここで0を入力してください,違うの場合は1")
-            j = input()
+            j = 1
+            if count != 0:
+                print("同じ脆弱性複数の場合、ここで0を入力してください,違うの場合は1")
+                j = input()
             if j == 1:
                 a.rlist.append(kaka)
                 a.destination_port.append(result["hits"]["hits"][0]["_source"]["destination_port"])
