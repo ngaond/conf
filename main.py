@@ -19,34 +19,42 @@ def get_badip():
     global badip_list
     global ip_string
     global badip_list
+    badip_tring+''
     list1 = []
+
     # 悪意フラグリクエスト抽出
-    query = {'query':
-        {'bool':
-            {'must':
-                {'term': {'@timestamp': '2021-01-17'}},
-            'should': [
-                {'regexp': {'request': '.*wget.*http.*:[0-9].*'}},
-                {'regexp': {'request': '.*curl.*http.*:[0-9].*'}},
-                {'regexp': {'request': '.*fetch.*http.*:[0-9].*'}},
-                {'regexp': {'request': '.*java.net.URL.*http.*:[0-9].*'}},
-                {'regexp': {'request': '.*urlopen.*http.*:[0-9].*'}},
-                {'regexp': {'request': '.*bitsadmin.*http.*:[0-9].*'}},
-                {'regexp': {'request': '.*explorer.*http.*:[0-9].*'}},
-                {'regexp': {'request': '.*certutil.*http.*:[0-9].*'}},
-                {'regexp': {'request': '.*Wscript.*http.*:[0-9].*'}},
-                {'regexp': {'request': '.*getstore.*http.*:[0-9].*'}},
-                {'regexp': {'request': '.*HTTP.start.*http.*:[0-9].*'}},
-                {'regexp': {'request': '.*lwp-download.*http.*:[0-9].*'}},
-                {'regexp': {'request': '.*objXMLHTTP.*http.*:[0-9].*'}},
-                {'regexp': {'request': '.*mshta.*http.*:[0-9].*'}}
-            ]}}}
-    result = es.search(index="xpot_accesslog-2021.01", body=query, size=100000)
-    for log in result["hits"]["hits"]:
+    while(True):
+        query = {'query':
+                     {'bool':
+                          {'must':
+                               {'term': {'@timestamp': '2021-01-17'}},
+                           'should': [
+                               {'regexp': {'request': '.*wget.*http.*:[0-9].*'}},
+                               {'regexp': {'request': '.*curl.*http.*:[0-9].*'}},
+                               {'regexp': {'request': '.*fetch.*http.*:[0-9].*'}},
+                               {'regexp': {'request': '.*java.net.URL.*http.*:[0-9].*'}},
+                               {'regexp': {'request': '.*urlopen.*http.*:[0-9].*'}},
+                               {'regexp': {'request': '.*bitsadmin.*http.*:[0-9].*'}},
+                               {'regexp': {'request': '.*explorer.*http.*:[0-9].*'}},
+                               {'regexp': {'request': '.*certutil.*http.*:[0-9].*'}},
+                               {'regexp': {'request': '.*Wscript.*http.*:[0-9].*'}},
+                               {'regexp': {'request': '.*getstore.*http.*:[0-9].*'}},
+                               {'regexp': {'request': '.*HTTP.start.*http.*:[0-9].*'}},
+                               {'regexp': {'request': '.*lwp-download.*http.*:[0-9].*'}},
+                               {'regexp': {'request': '.*objXMLHTTP.*http.*:[0-9].*'}},
+                               {'regexp': {'request': '.*mshta.*http.*:[0-9].*'}}
+                           ],
+                           'must_not': {'source_ip': ip_string}}}}
+        result = es.search(index="xpot_accesslog-2021.01", body=query, size=1)
+        if len(result["hits"]["hits"]) == 0:
+            break
+        log = result["hits"]["hits"][0]
         ip_string = ip_string + ", '" + log["_source"]["source_ip"] + "'"
+        print(ip_string)
+        input()
+        ip_string
         list1.append(log["_source"]["source_ip"])
-    badip_list = set(list1)
-    badip_list_bp =badip_list
+    badip_list_bp = badip_list
     list1 = []
     for badip in  badip_list:
         query = {'query': {'bool':
@@ -70,10 +78,11 @@ def get_badip():
                                         {'regexp': {'request': '.*mshta.*http.*:[0-9].*'}}
                                     ]}}}
         result = es.search(index="xpot_accesslog-2021.01", body=query, size=1)
-        list1.append(result["hits"]["hits"][0]["_source"]["source_ip"])
-        badip_list.remove(result["hits"]["hits"][0]["_source"]["source_ip"])
-        print(list1)
-        print(ip_string)
+        if len(result["hits"]["hits"])!=0:
+            list1.append(badip)
+            badip_list.remove(badip)
+    print(list1)
+    print(ip_string)
 
 
 def get_path(a, ip):
