@@ -23,24 +23,24 @@ def get_badip():
     # 悪意フラグリクエスト抽出
     query = {'query':
         {'bool':
-            {'must': [
+            {'must':
                 {'term': {'@timestamp': '2021-01-17'}},
-                {'bool': {'should': [
-                    {'regexp': {'request': '.*wget.*http.*:[0-9].*'}},
-                    {'regexp': {'request': '.*curl.*http.*:[0-9].*'}},
-                    {'regexp': {'request': '.*fetch.*http.*:[0-9].*'}},
-                    {'regexp': {'request': '.*java.net.URL.*http.*:[0-9].*'}},
-                    {'regexp': {'request': '.*urlopen.*http.*:[0-9].*'}},
-                    {'regexp': {'request': '.*bitsadmin.*http.*:[0-9].*'}},
-                    {'regexp': {'request': '.*explorer.*http.*:[0-9].*'}},
-                    {'regexp': {'request': '.*certutil.*http.*:[0-9].*'}},
-                    {'regexp': {'request': '.*Wscript.*http.*:[0-9].*'}},
-                    {'regexp': {'request': '.*getstore.*http.*:[0-9].*'}},
-                    {'regexp': {'request': '.*HTTP.start.*http.*:[0-9].*'}},
-                    {'regexp': {'request': '.*lwp-download.*http.*:[0-9].*'}},
-                    {'regexp': {'request': '.*objXMLHTTP.*http.*:[0-9].*'}},
-                    {'regexp': {'request': '.*mshta.*http.*:[0-9].*'}}
-                ]}}]}}}
+            'should': [
+                {'regexp': {'request': '.*wget.*http.*:[0-9].*'}},
+                {'regexp': {'request': '.*curl.*http.*:[0-9].*'}},
+                {'regexp': {'request': '.*fetch.*http.*:[0-9].*'}},
+                {'regexp': {'request': '.*java.net.URL.*http.*:[0-9].*'}},
+                {'regexp': {'request': '.*urlopen.*http.*:[0-9].*'}},
+                {'regexp': {'request': '.*bitsadmin.*http.*:[0-9].*'}},
+                {'regexp': {'request': '.*explorer.*http.*:[0-9].*'}},
+                {'regexp': {'request': '.*certutil.*http.*:[0-9].*'}},
+                {'regexp': {'request': '.*Wscript.*http.*:[0-9].*'}},
+                {'regexp': {'request': '.*getstore.*http.*:[0-9].*'}},
+                {'regexp': {'request': '.*HTTP.start.*http.*:[0-9].*'}},
+                {'regexp': {'request': '.*lwp-download.*http.*:[0-9].*'}},
+                {'regexp': {'request': '.*objXMLHTTP.*http.*:[0-9].*'}},
+                {'regexp': {'request': '.*mshta.*http.*:[0-9].*'}}
+            ]}}}
     result = es.search(index="xpot_accesslog-2021.01", body=query, size=100000)
     for log in result["hits"]["hits"]:
         ip_string = ip_string + ", '" + log["_source"]["source_ip"] + "'"
@@ -49,37 +49,31 @@ def get_badip():
     badip_list_bp =badip_list
     list1 = []
     for badip in  badip_list:
-        query = {'query': {'bool': {'must': [{'term': {'@timestamp': '2021-01-17'}}, {'term': {'source_ip': badip}}],
+        query = {'query': {'bool':
+                               {'must':
+                                    [{'term': {'@timestamp': '2021-01-17'}},
+                                     {'term': {'source_ip': badip}}],
                                     'must_not': [
                                         {'regexp': {'request': '.*wget.*http.*:[0-9].*'}},
                                         {'regexp': {'request': '.*curl.*http.*:[0-9].*'}},
-                                        {'regexp': {'request': '.*fetch.*http.*:[0-9].*',
-                                                    }},
-                                        {'regexp': {'request': '.*java.net.URL.*http.*:[0-9].*',
-                                                    }},
-                                        {'regexp': {'request': '.*urlopen.*http.*:[0-9].*',
-                                                    }},
-                                        {'regexp': {'request': '.*bitsadmin.*http.*:[0-9].*',
-                                                    }},
-                                        {'regexp': {'request': '.*explorer.*http.*:[0-9].*',
-                                                    }},
-                                        {'regexp': {'request': '.*certutil.*http.*:[0-9].*',
-                                                    }},
-                                        {'regexp': {'request': '.*Wscript.*http.*:[0-9].*',
-                                                    }},
-                                        {'regexp': {'request': '.*getstore.*http.*:[0-9].*',
-                                                    }},
-                                        {'regexp': {'request': '.*HTTP.start.*http.*:[0-9].*',
-                                                    }},
-                                        {'regexp': {'request': '.*lwp-download.*http.*:[0-9].*',
-                                                    }},
-                                        {'regexp': {'request': '.*objXMLHTTP.*http.*:[0-9].*',
-                                                    }},
+                                        {'regexp': {'request': '.*fetch.*http.*:[0-9].*'}},
+                                        {'regexp': {'request': '.*java.net.URL.*http.*:[0-9].*',}},
+                                        {'regexp': {'request': '.*urlopen.*http.*:[0-9].*'}},
+                                        {'regexp': {'request': '.*bitsadmin.*http.*:[0-9].*'}},
+                                        {'regexp': {'request': '.*explorer.*http.*:[0-9].*'}},
+                                        {'regexp': {'request': '.*certutil.*http.*:[0-9].*'}},
+                                        {'regexp': {'request': '.*Wscript.*http.*:[0-9].*'}},
+                                        {'regexp': {'request': '.*getstore.*http.*:[0-9].*'}},
+                                        {'regexp': {'request': '.*HTTP.start.*http.*:[0-9].*'}},
+                                        {'regexp': {'request': '.*lwp-download.*http.*:[0-9].*'}},
+                                        {'regexp': {'request': '.*objXMLHTTP.*http.*:[0-9].*'}},
                                         {'regexp': {'request': '.*mshta.*http.*:[0-9].*'}}
                                     ]}}}
         result = es.search(index="xpot_accesslog-2021.01", body=query, size=1)
         list1.append(result["hits"]["hits"][0]["_source"]["source_ip"])
         badip_list.remove(result["hits"]["hits"][0]["_source"]["source_ip"])
+        print(list1)
+        print(ip_string)
 
 
 def get_path(a, ip):
@@ -109,10 +103,13 @@ def get_path(a, ip):
             print(result["hits"]["hits"][0]["_source"]["request"])
             print("パスやパラメータなどリクエストの特徴を入力ください")
             kaka = input()
-            requestq = requestq + ",'" + kaka + "'"
+            a.requestq = a.requestq + ",'" + kaka + "'"
             a.requests.append(kaka)
-            print("同じ脆弱性複数の場合、ここで0を入力してください,違うの場合は1")
-            j = input()
+            print(a.requestq)
+            j=1
+            if count!=0:
+                print("同じ脆弱性複数の場合、ここで0を入力してください,違うの場合は1")
+                j = input()
             if j == 1:
                 a.rlist.append(kaka)
                 a.destination_port.append(result["hits"]["hits"][0]["_source"]["destination_port"])
@@ -516,13 +513,14 @@ def get_ip2():
     result1 = es.search(index="xpot_accesslog-2021.01", body=query, size=2000)
     if len(result1["hits"]["hits"]) < 2000:
         flag1 = 1
-    log = result["hits"]["hits"][0]["_source"]["source_ip"]
+    sig = result["hits"]["hits"][0]["_source"]["source_ip"]
     return sip
 
 
 def get_path2(a,sip):
     global badip_list
     global flag2
+    result = 1
     while len(result)!=0:
         query = {
             'query':
@@ -547,7 +545,7 @@ def get_path2(a,sip):
             print(result["hits"]["hits"][0]["_source"]["request"])
             print("パスやパラメータなどリクエストの特徴を入力ください")
             kaka = input()
-            requestq = requestq + ",'" + kaka + "'"
+            a.requestq = a.requestq + ",'" + kaka + "'"
             a.requests.append(kaka)
             print("同じ脆弱性複数の場合、ここで0を入力してください,違うの場合は1")
             j = input()
@@ -587,9 +585,10 @@ if __name__ == "__main__":
     global flag2
     flag2 = 0
     get_badip()
-    print( badip_listp)  # !!!!!!!!
+    print(badip_list)  # !!!!!!!!
     for badip in  badip_list:
         a = Requests()
+        a.requestq=''
         ip_list = []
         output_list = []
         a = get_path(a, badip)
