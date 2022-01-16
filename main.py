@@ -20,7 +20,7 @@ def get_badip():
     list1 = []
     ip_string = []
     # 悪意フラグリクエスト抽出
-    while len(ip_string) < 220:
+    while len(ip_string) < 100:
         query = {'query':
                      {'bool':
                           {'must':
@@ -70,7 +70,16 @@ def get_badip():
                                     {'regexp': {'request.keyword': '.*HTTP.start.*http.*:[0-9].*'}},
                                     {'regexp': {'request.keyword': '.*lwp-download.*http.*:[0-9].*'}},
                                     {'regexp': {'request.keyword': '.*objXMLHTTP.*http.*:[0-9].*'}},
-                                    {'regexp': {'request.keyword': '.*mshta.*http.*:[0-9].*'}}
+                                    {'regexp': {'request.keyword': '.*mshta.*http.*:[0-9].*'}},
+                                    {'match_phrase': {'request': '/.env'}},
+                                    {'match_phrase': {'request': 'HEAD / HTTP/1.0'}},
+                                    {'match_phrase': {'request': 'HEAD / HTTP/1.1'}},
+                                    {'match_phrase': {'request': 'POST / HTTP/1.0'}},
+                                    {'match_phrase': {'request': 'POST / HTTP/1.1'}},
+                                    {'match_phrase': {'request': 'GET / HTTP/1.0'}},
+                                    {'match_phrase': {'request': 'GET / HTTP/1.1'}},
+                                    {'match_phrase': {'request': '/Nmap'}},
+                                    {'match_phrase': {'request': 'GET /version HTTP/1.1'}}
                                 ]}}}
         result = es.search(index="xpot_accesslog-2021.01", body=query, size=1)
         if len(result["hits"]["hits"]) != 0:
@@ -83,7 +92,7 @@ def get_badip():
 def get_path(a, ip):
     global badip_list
     global count
-    request1 = "'/ HTTP/1.0'"
+    request1 = "'/favicon.ico'"
     m = 1
     # パス種類判断
     while m != 0:
@@ -93,8 +102,18 @@ def get_path(a, ip):
                     'must': [
                         {'term': {'@timestamp': '2021-01-17'}}, {'term': {'source_ip': ip}}],
                     'must_not': [
+                        {'match_phrase': {'request': '/.env'}},
+                        {'match_phrase': {'request': '/.env'}},
+                        {'match_phrase': {'request': 'HEAD / HTTP/1.0'}},
+                        {'match_phrase': {'request': 'HEAD / HTTP/1.1'}},
+                        {'match_phrase': {'request': 'POST / HTTP/1.0'}},
+                        {'match_phrase': {'request': 'POST / HTTP/1.1'}},
+                        {'match_phrase': {'request': 'GET / HTTP/1.0'}},
+                        {'match_phrase': {'request': 'GET / HTTP/1.1'}},
+                        {'match_phrase': {'request': '/Nmap'}},
+                        {'match_phrase': {'request': 'GET /version HTTP/1.1'}}
                         {'match_phrase': {'request': request1}}
-                        
+
                     ]
 
                 }}
@@ -109,7 +128,8 @@ def get_path(a, ip):
             kaka = input()
             # a.requestq = a.requestq + ",'" + kaka + "'"
             a.requests.append(kaka)
-            request1 = request1 + "}}, {'match_phrase': {'request': '"+kaka+"'"
+            request1 = request1 + "}}, {'match_phrase': {'request': '" + kaka + "'"
+            print(request1)
             # print(a.requestq)
             j = 1
             if count != 0:
@@ -354,12 +374,12 @@ def group_analysis2(a, group):
                         ncount = ncount + 1
                 if ncount >= (len(a.requests) / 2) and len(a.requests) > 6:
                     print(ipl)
-                    print("重ね合わせたパスが多いので、手で調べてください,関連がれば1、なければ0を入力してください")
+                    print("重ねたパスが多いので、手で調べてください,関連がれば1、なければ0を入力してください")
                     if input() == 0:
                         ipl.remove(badip)
                 elif len(a.requests) < 6 and ncount >= (len(a.requests)) - 1:
                     print(ipl)
-                    print("重ね合わせたパスが多いので、手で調べてください,関連がれば1、なければ0を入力してください")
+                    print("重ねたパスが多いので、手で調べてください,関連がれば1、なければ0を入力してください")
                     if input() == 0:
                         ipl.remove(badip)
                 else:
@@ -425,15 +445,15 @@ def group_analysis2(a, group):
                                             '167.248.133.96',
                                             '74.120.14.96', '185.220.101.51', '46.254.20.36', '185.220.100.252',
                                             '162.142.125.128']}},  # shodan and censys
-
-                          {'terms':
-                               {'request.keyword': ['HEAD / HTTP/1.0', 'HEAD / HTTP/1.1', 'POST / HTTP/1.0',
-                                                    'POST / HTTP/1.1',
-                                                    'GET / HTTP/1.0', 'GET / HTTP/1.1', '/favicon.ico', '/.env',
-                                                    '/Nmap',
-                                                    'OPTIONS / HTTP/1.0', 'OPTIONS / HTTP/1.1', 'GET /version HTTP/1.1']
-                                }
-                           }
+                          {'match_phrase': {'request': '/.env'}},
+                          {'match_phrase': {'request': 'HEAD / HTTP/1.0'}},
+                          {'match_phrase': {'request': 'HEAD / HTTP/1.1'}},
+                          {'match_phrase': {'request': 'POST / HTTP/1.0'}},
+                          {'match_phrase': {'request': 'POST / HTTP/1.1'}},
+                          {'match_phrase': {'request': 'GET / HTTP/1.0'}},
+                          {'match_phrase': {'request': 'GET / HTTP/1.1'}},
+                          {'match_phrase': {'request': '/Nmap'}},
+                          {'match_phrase': {'request': 'GET /version HTTP/1.1'}}
                       ],
                       'must_not': {'terms': {'source_ip': ip_string}}
                       }
@@ -612,6 +632,24 @@ if __name__ == "__main__":
             ipcount = ipcount + 1
             group_analysis2(a, "bad")
     # get_onerequest()
+
+    '''
+    'HEAD / HTTP/1.0', 'HEAD / HTTP/1.1', 'POST / HTTP/1.0',
+                                                      'POST / HTTP/1.1',
+                                                      'GET / HTTP/1.0', 'GET / HTTP/1.1', '/favicon.ico', '/.env',
+                                                      '/Nmap',
+                                                      'OPTIONS / HTTP/1.0', 'OPTIONS / HTTP/1.1',
+                                                      'GET /version HTTP/1.1'
+    '''
+    print("'HEAD / HTTP/1.0', 'HEAD / HTTP/1.1', 'POST / HTTP/1.0','POST / HTTP/1.1','GET / HTTP/1.0', "
+          "'GET / HTTP/1.1', '/favicon.ico', '/.env','/Nmap','OPTIONS / HTTP/1.0', 'OPTIONS / HTTP/1.1','GET /version "
+          "HTTP/1.1'")
+    print("以上のuri、調査範囲から排除したいものを選んで,最後に0で入力してください")
+    k = input()
+    path = []
+    while k != 0:
+        path = path + k
+        k = input()
     loopcount = 0
     '''
     while (loopcount < 3 and flag1 == 0 and flag2 == 0):
