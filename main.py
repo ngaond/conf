@@ -103,7 +103,6 @@ def get_path(a, ip):
                         {'term': {'@timestamp': '2021-01-17'}}, {'term': {'source_ip': ip}}],
                     'must_not': [
                         {'match_phrase': {'request': '/.env'}},
-                        {'match_phrase': {'request': '/.env'}},
                         {'match_phrase': {'request': 'HEAD / HTTP/1.0'}},
                         {'match_phrase': {'request': 'HEAD / HTTP/1.1'}},
                         {'match_phrase': {'request': 'POST / HTTP/1.0'}},
@@ -111,9 +110,8 @@ def get_path(a, ip):
                         {'match_phrase': {'request': 'GET / HTTP/1.0'}},
                         {'match_phrase': {'request': 'GET / HTTP/1.1'}},
                         {'match_phrase': {'request': '/Nmap'}},
-                        {'match_phrase': {'request': 'GET /version HTTP/1.1'}}
-                        {'match_phrase': {'request': request1}}
-
+                        {'match_phrase': {'request': 'GET /version HTTP/1.1'}},
+                        {'match_phrase': {'request': ''+request1}}
                     ]
 
                 }}
@@ -123,6 +121,7 @@ def get_path(a, ip):
         result = es.search(index="xpot_accesslog-2021.01", body=query, size=1)
         m = len(result["hits"]["hits"])
         if (m) != 0:
+            print(result["hits"]["hits"][0]["_source"]["source_ip"])
             print(result["hits"]["hits"][0]["_source"]["request"])
             print("パスやパラメータなどリクエストの特徴を入力ください")
             kaka = input()
