@@ -20,7 +20,7 @@ def get_badip():
     list1 = []
     ip_string = []
     # 悪意フラグリクエスト抽出
-    while len(ip_string)<220:
+    while len(ip_string) < 220:
         query = {'query':
                      {'bool':
                           {'must':
@@ -89,6 +89,10 @@ def get_badip():
 
 def get_path(a, ip):
     global badip_list
+    global count
+    request1 = ['HEAD / HTTP/1.0', 'HEAD / HTTP/1.1', 'POST / HTTP/1.0', 'POST / HTTP/1.1', 'GET / HTTP/1.0',
+                'GET / HTTP/1.1', '/favicon.ico', '/.env', '/Nmap', 'OPTIONS / HTTP/1.0', 'OPTIONS / HTTP/1.1',
+                'GET /version HTTP/1.1', 'GET / HTTP/1.0']
     m = 1
     # パス種類判断
     while m != 0:
@@ -98,17 +102,10 @@ def get_path(a, ip):
                     'must': [
                         {'term': {'@timestamp': '2021-01-17'}}, {'term': {'source_ip': ip}}
                     ],
-                    'must_not': [
-                        {'terms': {'request.keyword': a.requests}},
-                        {'terms': {'request.keyword': ['HEAD / HTTP/1.0', 'HEAD / HTTP/1.1', 'POST / HTTP/1.0',
-                                                       'POST / HTTP/1.1', 'GET / HTTP/1.0', 'GET / HTTP/1.1',
-                                                       '/favicon.ico',
-                                                       '/.env', '/Nmap', 'OPTIONS / HTTP/1.0', 'OPTIONS / HTTP/1.1',
-                                                       'GET /version HTTP/1.1'
-                                                       ]}
-                         }
-                    ]
+                    'must_not':
+                        {'terms': {'request.keyword': request1}}
                 }
+
                 }
         }
         result = es.search(index="xpot_accesslog-2021.01", body=query, size=1)
@@ -119,18 +116,17 @@ def get_path(a, ip):
             kaka = input()
             # a.requestq = a.requestq + ",'" + kaka + "'"
             a.requests.append(kaka)
+            request1.append(kaka)
             # print(a.requestq)
             j = 1
             if count != 0:
                 print("同じ脆弱性複数の場合、ここで0を入力してください,違うの場合は1")
                 j = input()
             if j == 1:
-                a.rlist.append(kaka)
                 a.destination_port.append(result["hits"]["hits"][0]["_source"]["destination_port"])
                 a.destination_ip.append(result["hits"]["hits"][0]["_source"]["destination_ip"])
-                a.source_ip = badip
                 count = count + 1
-                badip_list.remove(a.source_ip)
+    badip_list.remove(badip)
     return a
 
 
@@ -570,7 +566,6 @@ def get_path2(a, sip):
                 print("同じ脆弱性複数の場合、ここで0を入力してください,違うの場合は1")
                 j = input()
             if j == 1:
-                a.rlist.append(kaka)
                 a.destination_port.append(result["hits"]["hits"][0]["_source"]["destination_port"])
                 a.destination_ip.append(result["hits"]["hits"][0]["_source"]["destination_ip"])
                 a.source_ip = badip
@@ -617,7 +612,6 @@ if __name__ == "__main__":
         a = get_path(a, badip)
         ipcount = 0
         if count == 1:  # パス一種類だけ
-            ip_list.append(a)
             ipcount = ipcount + 1
             group_analysis1(a, "bad")
         else:  # 複数システムを狙う
