@@ -70,15 +70,8 @@ def get_badip():
                                     {'regexp': {'request.keyword': '.*HTTP.start.*http.*:[0-9].*'}},
                                     {'regexp': {'request.keyword': '.*lwp-download.*http.*:[0-9].*'}},
                                     {'regexp': {'request.keyword': '.*objXMLHTTP.*http.*:[0-9].*'}},
-                                    {'regexp': {'request.keyword': '.*mshta.*http.*:[0-9].*'}},
-                                    {'terms': {
-                                        'request.keyword': ['HEAD / HTTP/1.0', 'HEAD / HTTP/1.1', 'POST / HTTP/1.0',
-                                                            'POST / HTTP/1.1', 'GET / HTTP/1.0', 'GET / HTTP/1.1',
-                                                            '/favicon.ico',
-                                                            '/.env', '/Nmap', 'OPTIONS / HTTP/1.0',
-                                                            'OPTIONS / HTTP/1.1',
-                                                            'GET /version HTTP/1.1'
-                                                            ]}}]}}}
+                                    {'regexp': {'request.keyword': '.*mshta.*http.*:[0-9].*'}}
+                                ]}}}
         result = es.search(index="xpot_accesslog-2021.01", body=query, size=1)
         if len(result["hits"]["hits"]) != 0:
             list1.append(badip)
@@ -90,9 +83,7 @@ def get_badip():
 def get_path(a, ip):
     global badip_list
     global count
-    request1 = ['HEAD / HTTP/1.0', 'HEAD / HTTP/1.1', 'POST / HTTP/1.0', 'POST / HTTP/1.1', 'GET / HTTP/1.0',
-                'GET / HTTP/1.1', '/favicon.ico', '/.env', '/Nmap', 'OPTIONS / HTTP/1.0', 'OPTIONS / HTTP/1.1',
-                'GET /version HTTP/1.1', 'GET / HTTP/1.0']
+    request1 = "'/ HTTP/1.0'"
     m = 1
     # パス種類判断
     while m != 0:
@@ -100,14 +91,16 @@ def get_path(a, ip):
             'query':
                 {'bool': {
                     'must': [
-                        {'term': {'@timestamp': '2021-01-17'}}, {'term': {'source_ip': ip}}
-                    ],
-                    'must_not':
-                        {'terms': {'request.keyword': request1}}
-                }
+                        {'term': {'@timestamp': '2021-01-17'}}, {'term': {'source_ip': ip}}],
+                    'must_not': [
+                        {'match_phrase': {'request': request1}}
+                        
+                    ]
 
-                }
+                }}
+
         }
+
         result = es.search(index="xpot_accesslog-2021.01", body=query, size=1)
         m = len(result["hits"]["hits"])
         if (m) != 0:
@@ -116,7 +109,7 @@ def get_path(a, ip):
             kaka = input()
             # a.requestq = a.requestq + ",'" + kaka + "'"
             a.requests.append(kaka)
-            request1.append(kaka)
+            request1 = request1 + "}}, {'match_phrase': {'request': '"+kaka+"'"
             # print(a.requestq)
             j = 1
             if count != 0:
