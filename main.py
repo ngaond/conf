@@ -134,7 +134,7 @@ def get_path(a, ip):
                 a.destination_port.append(result["hits"]["hits"][0]["_source"]["destination_port"])
                 a.destination_ip.append(result["hits"]["hits"][0]["_source"]["destination_ip"])
                 count = count + 1
-    badip_list.remove(badip)
+    badip_list.remove(ip)
     return a
 
 
@@ -255,7 +255,6 @@ def group_analysis1(a, group):
             b = get_path(b, badip)
             if count == 1:
                 ip_list.append(b)
-                ipcount = ipcount + 1
         get_deip()
         for index in range(len(ip_list)):
             badip_list.remove(ip_list[index].source_ip)
@@ -360,13 +359,13 @@ def group_analysis2(a, group):
                 ipl.append(badip)
                 ncount = ncount + 1
                 for index in range(len(a.requests)):
-                    query = {'query': {
+                    query1 = {'query': {
                         'bool': {'must': [{'term': {'@timestamp': '2021-01-17'}}, {'term': {'source_ip': badip}}
                                           ],
                                  'must': {'terms': {'request.keyword': a.requests[index]}},
                                  }
                     }}
-                    result = es.search(index="xpot_accesslog-2021.01", body=query, size=1)
+                    result = es.search(index="xpot_accesslog-2021.01", body=query1, size=1)
                     if len(result["hits"]["hits"]) != 0:
                         ncount = ncount + 1
                 if ncount >= (len(a.requests) / 2) and len(a.requests) > 6:
@@ -606,7 +605,6 @@ if __name__ == "__main__":
     output_list = []
     global count
     count = 0
-    ipcount = 0
     global ip_string
     ip_string = []
     global es
@@ -626,13 +624,10 @@ if __name__ == "__main__":
         count = 0
         output_list = []
         a = get_path(a, badip)
-        ipcount = 0
         if count == 1:  # パス一種類だけ
-            ipcount = ipcount + 1
             group_analysis1(a, "bad")
         else:  # 複数システムを狙う
             ip_list.append(a)
-            ipcount = ipcount + 1
             group_analysis2(a, "bad")
     # get_onerequest()
 
@@ -661,17 +656,14 @@ if __name__ == "__main__":
         ip_list = []
         output_list = []
         a = get_path2(a, (get_ip2()))
-        ipcount = 0
         if count == 1:  # パス一種類だけ
             loopcount = loopcount + 1
             ip_list.append(a)
-            ipcount = ipcount + 1
             group_analysis1(a, "not bad")
             ip_string.append(a.source_ip)
         else:
             loopcount == 0
             ip_list.append(a)
-            ipcount = ipcount + 1
             group_analysis2(a, "not bad")
 
     query = {
