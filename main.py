@@ -93,6 +93,7 @@ def get_path(a, ip):
     global badip_list
     global count
     m = 1
+    a.source_ip = ip
     # パス種類判断
     query = {
         'query':
@@ -139,6 +140,7 @@ def get_path(a, ip):
 
 def get_deport(n, list1, list2, kip):
     global output_list
+    global ip_list
     deport = []
     portde = []
     ip_list_bk = ip_list
@@ -157,15 +159,15 @@ def get_deport(n, list1, list2, kip):
         for log in result["hits"]["hits"]:
             deport.append(log["_source"]["destination_port"])
         deport = set(deport)
-        if len(deport) != 1:
+        if len(deport) > 4:
             output_list.append(ip_list_bk[index])
             del ip_list_bk[index]
             index = index - 1
         else:
-            portde.append(deport[0])
+            print('sip: ' + ip_list_bk[index].source_ip + '---dport: ' + deport)
+    print("複数ソースが同じポートを狙う特徴があるのか？なければ0を入力")
+    kport = input()
     if n == 0:  # 目標ハニーポット数に特徴なし
-        print(portde)
-        print("複数ソースから同じポートを狙う特徴があるのか？")
         kport = input()
         if kport == '':
             get_deport("0")
@@ -222,7 +224,7 @@ def get_deip():
             del ip_list_bk[index]
             index = index - 1
         else:
-            print('sip: ' + ip_list[index].source_ip + '---dip: ' + ip_list[index].destination_ip)
+            print('sip: ' + ip_list_bk[index].source_ip + '---dip: ' + ip_list_bk[index].destination_ip)
     print("複数ソースが同じハニーポットを狙う特徴があるのか？なければ0を入力")
     kip = input()
     if kip == 0:
@@ -346,7 +348,7 @@ def group_analysis2(a, group):
     global ip_string
     global badip_list
     ipl = []
-    ipl.append(a.source_ip[0])
+    ipl.append(a.source_ip)
     if group == "bad":
         for badip in badip_list:
             ncount = 0
@@ -637,7 +639,7 @@ if __name__ == "__main__":
     for badip in badip_list:
         a = Requests()
         a.requests = []
-        a.source_ip = []
+        a.source_ip = ''
         a.destination_ip = []
         # a.requestq = ''
         ip_list = []
