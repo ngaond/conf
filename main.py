@@ -9,7 +9,6 @@ class Requests(object):
         self.source_ip = ''
         self.destination_ip = []
         self.destination_port = []
-        # self.requestq = ''
         self.requests = []
 
 
@@ -91,8 +90,10 @@ def get_badip():
 def get_path(ip):
     global badip_list
     global count
+    global ip_list
     m = 1
     a=Requests()
+    a.source_ip = ip
     # パス種類判断
     query = {
         'query':
@@ -114,16 +115,19 @@ def get_path(ip):
             }}
 
     }
+    if len(ip_list) != 0:
+        query['query']['bool']['must_not'].append({'match_phrase': {'request': ip_list[0].requests[0]}})
     while m != 0:
         result = es.search(index="xpot_accesslog-2021.01", body=query, size=1)
         m = len(result["hits"]["hits"])
-        if (m) != 0:
+        if m != 0:
             print(result["hits"]["hits"][0]["_source"]["source_ip"])
             print(result["hits"]["hits"][0]["_source"]["request"])
             print("パスやパラメータなどリクエストの特徴を入力ください")
             kaka = input()
             # a.requestq = a.requestq + ",'" + kaka + "'"
             a.requests.append(kaka)
+            print(a.requests)
             query['query']['bool']['must_not'].append({'match_phrase': {'request': kaka}})
             # print(a.requestq)
             j = 1
@@ -133,7 +137,6 @@ def get_path(ip):
             if j == 1:
                 a.destination_port.append(result["hits"]["hits"][0]["_source"]["destination_port"])
                 a.destination_ip.append(result["hits"]["hits"][0]["_source"]["destination_ip"])
-                a.source_ip = result["hits"]["hits"][0]["_source"]["source_ip"]
                 count = count + 1
     return a
 
@@ -156,12 +159,11 @@ def get_deport(n, list1, list2, kip):
         }
         result = es.search(index="xpot_accesslog-2021.01", body=query, size=10000)
         for log in result["hits"]["hits"]:
-            deport.append(log["_source"]["destination_port"])
-        deport = set(deport)
+            deport.append(log[0]["_source"]["destination_port"])
+        deport = list(set(deport))
         if len(deport) > 3:
             output_list.append(ip_list_bk[index])
             del ip_list_bk[index]
-            index = index - 1
         else:
             print('sip: ', end=" ")
             print(ip_list_bk[index].source_ip, end=" ")
@@ -294,9 +296,9 @@ def get_deip():
     global ip_list
     ip_list_bk = ip_list
     deip = []
-    for index in range(len(ip_list_bk)):
+    for m in range(len(ip_list_bk)):
         sip = ''
-        sip = ip_list_bk[index].source_ip
+        sip = ip_list_bk[m].source_ip
         query = {
             'query':
                 {'bool':
@@ -309,14 +311,13 @@ def get_deip():
         result = es.search(index="xpot_accesslog-2021.01", body=query, size=10000)
         for log in result["hits"]["hits"]:
             deip.append(log["_source"]["destination_ip"])
-        deip = set(deip)
+        deip = list(set(deip))
         if len(deip) != 1:
-            output_list.append(ip_list_bk[index])
-            del ip_list_bk[index]
-            index = index - 1
+            output_list.append(ip_list_bk[m])
+            del ip_list_bk[m]
         else:
             print('sip: ', end=" ")
-            print(ip_list_bk[index].source_ip, end=" ")
+            print(ip_list_bk[m].source_ip, end=" ")
             print('---dip: ', end=" ")
             print(deip)
     print("複数ソースが同じハニーポットを狙う特徴があるのか？なければ0を入力")
@@ -324,9 +325,9 @@ def get_deip():
     if kip == 0:
         get_deport("0", ip_list_bk, output_list, kip)
     else:
-        for index in range(len(ip_list_bk)):
-            if ip_list_bk[index].destination_ip != kip:
-                output_list.append(ip_list_bk[index])
+        for n in range(len(ip_list_bk)):
+            if ip_list_bk[n].destination_ip != kip:
+                output_list.append(ip_list_bk[n])
         get_deport("1", ip_list_bk, output_list, kip)
 
 
@@ -348,7 +349,7 @@ def group_analysis1(a, group):
             result = es.search(index="xpot_accesslog-2021.01", body=query, size=1)
             if len(result["hits"]["hits"]) != 0:
                 b = Requests()
-                count = 0
+                count = 1
                 b = get_path(badip)
                 if count == 1:
                     ip_list.append(b)
@@ -430,11 +431,10 @@ def group_analysis1(a, group):
         result = es.search(index="xpot_accesslog-2021.01", body=query, size=1)
         if len(result["hits"]["hits"]) != 0:
             b = Requests()
-            count = 0
+            count = 1
             b = get_path2(result["hits"]["hits"][0]["_source"]["source_ip"])
             if count == 1:
                 ip_list.append(b)
-                print(len(ip_list))
                 ip_string.append(b.source_ip)
         get_deip()
 
@@ -742,7 +742,7 @@ if __name__ == "__main__":
         if count == 1:  # パス一種類だけ
             badip_list.remove(badip)
             ip_list.append(a)
-            print(len(ip_list))
+            print(ip_list[0].destination_port)
             group_analysis1(a, "bad")
         else:  # 複数システムを狙う
             badip_list.remove(badip)
