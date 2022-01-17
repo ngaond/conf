@@ -17,7 +17,6 @@ def get_badip():
     global badip_list
     global ip_string
     global badip_list_bp
-    list1 = []
     ip_string = []
     # 悪意フラグリクエスト抽出
     while len(ip_string) < 100:
@@ -89,11 +88,11 @@ def get_badip():
     print(len(ip_string))
 
 
-def get_path(a, ip):
+def get_path(ip):
     global badip_list
     global count
     m = 1
-    a.source_ip = ip
+    a=Requests()
     # パス種類判断
     query = {
         'query':
@@ -134,6 +133,7 @@ def get_path(a, ip):
             if j == 1:
                 a.destination_port.append(result["hits"]["hits"][0]["_source"]["destination_port"])
                 a.destination_ip.append(result["hits"]["hits"][0]["_source"]["destination_ip"])
+                a.source_ip = result["hits"]["hits"][0]["_source"]["source_ip"]
                 count = count + 1
     return a
 
@@ -293,7 +293,7 @@ def get_deip():
     global output_list
     global ip_list
     ip_list_bk = ip_list
-    i = 0
+    deip = []
     for index in range(len(ip_list_bk)):
         sip = ''
         sip = ip_list_bk[index].source_ip
@@ -307,7 +307,6 @@ def get_deip():
                 }
         }
         result = es.search(index="xpot_accesslog-2021.01", body=query, size=10000)
-        deip = []
         for log in result["hits"]["hits"]:
             deip.append(log["_source"]["destination_ip"])
         deip = set(deip)
@@ -341,7 +340,7 @@ def group_analysis1(a, group):
             count = 0
             query = {'query': {
                 'bool': {'must': [{'term': {'@timestamp': '2021-01-17'}},
-                                  {'match_phrase': {'request.keyword': a.requests[0]}},
+                                  {'match_phrase': {'request': a.requests[0]}},
                                   {'term': {'source_ip': badip}}
                                   ]
                          }
@@ -349,7 +348,8 @@ def group_analysis1(a, group):
             result = es.search(index="xpot_accesslog-2021.01", body=query, size=1)
             if len(result["hits"]["hits"]) != 0:
                 b = Requests()
-                b = get_path(b, badip)
+                count = 0
+                b = get_path(badip)
                 if count == 1:
                     ip_list.append(b)
                     badip_list.remove(badip)
@@ -413,16 +413,15 @@ def group_analysis1(a, group):
                                               '167.248.133.96',
                                               '74.120.14.96', '185.220.101.51', '46.254.20.36', '185.220.100.252',
                                               '162.142.125.128']}},  # shodan and censys
-
-                            {'terms':
-                                 {'request.keyword': ['HEAD / HTTP/1.0', 'HEAD / HTTP/1.1', 'POST / HTTP/1.0',
-                                                      'POST / HTTP/1.1',
-                                                      'GET / HTTP/1.0', 'GET / HTTP/1.1', '/favicon.ico', '/.env',
-                                                      '/Nmap',
-                                                      'OPTIONS / HTTP/1.0', 'OPTIONS / HTTP/1.1',
-                                                      'GET /version HTTP/1.1']
-                                  }
-                             }
+                            {'match_phrase': {'request': '/.env'}},
+                            {'match_phrase': {'request': 'HEAD / HTTP/1.0'}},
+                            {'match_phrase': {'request': 'HEAD / HTTP/1.1'}},
+                            {'match_phrase': {'request': 'POST / HTTP/1.0'}},
+                            {'match_phrase': {'request': 'POST / HTTP/1.1'}},
+                            {'match_phrase': {'request': 'GET / HTTP/1.0'}},
+                            {'match_phrase': {'request': 'GET / HTTP/1.1'}},
+                            {'match_phrase': {'request': '/Nmap'}},
+                            {'match_phrase': {'request': 'GET /version HTTP/1.1'}}
                         ],
                         'must_not': {'terms': {'source_ip': ip_string}}
                     }
@@ -432,9 +431,10 @@ def group_analysis1(a, group):
         if len(result["hits"]["hits"]) != 0:
             b = Requests()
             count = 0
-            b = get_path2(b, result["hits"]["hits"][0]["_source"]["source_ip"])
+            b = get_path2(result["hits"]["hits"][0]["_source"]["source_ip"])
             if count == 1:
                 ip_list.append(b)
+                print(len(ip_list))
                 ip_string.append(b.source_ip)
         get_deip()
 
@@ -641,7 +641,6 @@ def get_ip2():
                                                '167.94.138.2', '178.57.220.188', '163.172.164.243', '167.248.133.96',
                                                '74.120.14.96', '185.220.101.51', '46.254.20.36', '185.220.100.252',
                                                '162.142.125.128']}},  # shodan and censys
-
                       {'match_phrase': {'request': '/.env'}},
                       {'match_phrase': {'request': 'HEAD / HTTP/1.0'}},
                       {'match_phrase': {'request': 'HEAD / HTTP/1.1'}},
@@ -651,7 +650,6 @@ def get_ip2():
                       {'match_phrase': {'request': 'GET / HTTP/1.1'}},
                       {'match_phrase': {'request': '/Nmap'}},
                       {'match_phrase': {'request': 'GET /version HTTP/1.1'}}
-
                   ],
                   'must_not': {'terms': {'source_ip': ip_string}}
                   }
@@ -700,7 +698,7 @@ def get_path2(a, sip):
             if j == 1:
                 a.destination_port.append(result["hits"]["hits"][0]["_source"]["destination_port"])
                 a.destination_ip.append(result["hits"]["hits"][0]["_source"]["destination_ip"])
-                a.source_ip = badip
+                a.source_ip=result["hits"]["hits"][0]["_source"]["source_ip"]
                 count = count + 1
                 badip_list.remove(a.source_ip)
     return a
@@ -740,10 +738,11 @@ if __name__ == "__main__":
         ip_list = []
         count = 0
         output_list = []
-        a = get_path(a, badip)
+        a = get_path(badip)
         if count == 1:  # パス一種類だけ
             badip_list.remove(badip)
             ip_list.append(a)
+            print(len(ip_list))
             group_analysis1(a, "bad")
         else:  # 複数システムを狙う
             badip_list.remove(badip)
