@@ -68,16 +68,7 @@ def get_badip():
                                     {'regexp': {'request.keyword': '.*HTTP.start.*http.*:[0-9].*'}},
                                     {'regexp': {'request.keyword': '.*lwp-download.*http.*:[0-9].*'}},
                                     {'regexp': {'request.keyword': '.*objXMLHTTP.*http.*:[0-9].*'}},
-                                    {'regexp': {'request.keyword': '.*mshta.*http.*:[0-9].*'}},
-                                    {'match_phrase': {'request': '/.env'}},
-                                    {'match_phrase': {'request': 'HEAD / HTTP/1.0'}},
-                                    {'match_phrase': {'request': 'HEAD / HTTP/1.1'}},
-                                    {'match_phrase': {'request': 'POST / HTTP/1.0'}},
-                                    {'match_phrase': {'request': 'POST / HTTP/1.1'}},
-                                    {'match_phrase': {'request': 'GET / HTTP/1.0'}},
-                                    {'match_phrase': {'request': 'GET / HTTP/1.1'}},
-                                    {'match_phrase': {'request': '/Nmap'}},
-                                    {'match_phrase': {'request': 'GET /version HTTP/1.1'}}
+                                    {'regexp': {'request.keyword': '.*mshta.*http.*:[0-9].*'}}
                                 ]}}}
         result = es.search(index="xpot_accesslog-2021.01", body=query, size=1)
         if len(result["hits"]["hits"]) != 0:
@@ -85,6 +76,7 @@ def get_badip():
             badip_list.remove(badip)
     print(len(list1))
     print(len(ip_string))
+    print(badip_list)
 
 
 def get_path(ip):
@@ -125,7 +117,6 @@ def get_path(ip):
             print(result["hits"]["hits"][0]["_source"]["request"])
             print("パスやパラメータなどリクエストの特徴を入力ください")
             kaka = input()
-            # a.requestq = a.requestq + ",'" + kaka + "'"
             a.requests.append(kaka)
             query['query']['bool']['must_not'].append({'match_phrase': {'request': kaka}})
             # print(a.requestq)
@@ -143,12 +134,11 @@ def get_path(ip):
 def get_deport(n, list1, list2, kip):
     global output_list
     global ip_list
-    deport = []
-    deport_l = []
     ip_list_bk = ip_list
     m = 0
     while m < len(ip_list_bk):
         sip = ip_list_bk[m].source_ip
+        deport = []
         query = {
             'query':
                 {'bool':
@@ -294,9 +284,9 @@ def get_deip():
     global output_list
     global ip_list
     ip_list_bk = ip_list
-    deip = []
     m = 0
     while m < len(ip_list_bk):
+        deip = []
         sip = ''
         sip = ip_list_bk[m].source_ip
         query = {
@@ -312,7 +302,7 @@ def get_deip():
         for log in result["hits"]["hits"]:
             deip.append(log["_source"]["destination_ip"])
         deip = list(set(deip))
-        ip_list_bk[m].destination_ip=deip
+        ip_list_bk[m].destination_ip = deip
         if len(deip) != 1:
             output_list.append(ip_list_bk[m])
             del ip_list_bk[m]
@@ -350,7 +340,6 @@ def group_analysis1(a, group):
             }}
             result = es.search(index="xpot_accesslog-2021.01", body=query, size=1)
             if len(result["hits"]["hits"]) != 0:
-                b = Requests()
                 count = 1
                 b = get_path(badip)
                 if count == 1:
@@ -737,7 +726,6 @@ if __name__ == "__main__":
         a.requests = []
         a.source_ip = ''
         a.destination_ip = []
-        # a.requestq = ''
         ip_list = []
         count = 0
         output_list = []
