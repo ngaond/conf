@@ -142,7 +142,6 @@ def get_deport(n, list1, list2, kip):
     global output_list
     global ip_list
     deport = []
-    portde = []
     ip_list_bk = ip_list
     for index in range(len(ip_list_bk)):
         sip = ip_list_bk[index].source_ip
@@ -159,42 +158,135 @@ def get_deport(n, list1, list2, kip):
         for log in result["hits"]["hits"]:
             deport.append(log["_source"]["destination_port"])
         deport = set(deport)
-        if len(deport) > 4:
+        if len(deport) > 3:
             output_list.append(ip_list_bk[index])
             del ip_list_bk[index]
             index = index - 1
         else:
-            print('sip: ' + ip_list_bk[index].source_ip + '---dport: ' + deport)
+            print('sip: ', end=" ")
+            print(ip_list_bk[index].source_ip, end=" ")
+            print('---dport: ', end=" ")
+            print(deport)
     print("複数ソースが同じポートを狙う特徴があるのか？なければ0を入力")
     kport = input()
+    # output
     if n == 0:  # 目標ハニーポット数に特徴なし
-        kport = input()
-        if kport == '':
-            get_deport("0")
+        if kport == 0:  # ポート特徴なし
+            print('sip: ', end=" ")
             for index in range(len(ip_list)):
-                print(ip_list[index])  # !!!!!!!!!
-        else:
+                print(ip_list[index].source_ip)
+            print('パス： ', end=" ")
+            print(ip_list[0].requests)
+            print("パターン:複数目標、複数ポート")
+        else:  # ポート特徴あるり
+            count_1 = 0  # 同じパスで、ポート特徴ありとなし、2つパターン
+            count_2 = 0
+            output_list1 = output_list
             for index in range(len(ip_list_bk)):
-                if ip_list_bk[index].destination_port != kport:
-                    output_list.append(ip_list_bk[index])
-            print(output_list)  # !!!!!!!!!!!!!!
-            print(ip_list_bk[index])
-    else:  # 目標ハニーポット数に特徴あり
-        for index in range(len(ip_list_bk)):
-            print(ip_list_bk[index].destination_ip, ip_list_bk[index].destination_port)
-        print("複数ソースから同じポートを狙う特徴があるのか？目標ハニーポット数を配慮し特徴ポート入力してください")
-        kport = input()
-        if kport == '':
-            print(list1)  # !!!!!!!!!
-            print(list2)
-        else:
-            output_list = []
-            for index in range(len(ip_list)):
-                if ip_list[index].destination_ip == kip and ip_list[index].destination_port == kport:
-                    print(ip_list[index])
+                if list1[index].destination_port != kport:
+                    output_list1.append(ip_list_bk[index])
+                    count_2 = 1
                 else:
-                    output_list.append(ip_list[index])
-            print(output_list)
+                    if count_1 == 0:
+                        print('sip: ', end=" ")
+                    print(ip_list_bk[index].source_ip)
+                    count_1 = 1
+            if count_1 == 1:
+                print('dport: ', end=" ")
+                print(kport)
+                print('パス： ', end=" ")
+                print(ip_list_bk[0].requests)
+                print("複数目標、特定ポート")
+            if count_2 == 1:
+                print('sip: ', end=" ")
+                for index in range(len(output_list1)):
+                    print(output_list1[index].source_ip)
+                print('パス： ', end=" ")
+                print(output_list1[0].requests)
+                print("パターン:複数目標、複数ポート")
+    else:  # 目標ハニーポット数に特徴あり
+        if kport == 0:  # ポート特徴なし
+            count_1 = 0  # 同じパスで、目標ハニーポット数、特徴ありとなし、2つパターン
+            count_2 = 0
+            print('sip: ', end=" ")
+            for index in range(len(list1)):
+                if count_1 == 0:
+                    print('sip: ', end=" ")
+                print(list1[index].source_ip)
+                count_1 = 1
+            if count_1 == 1:
+                print('deip: ', end=" ")
+                print(kip)
+                print('パス： ', end=" ")
+                print(list1[0].requests)
+                print("特定目標、複数ポート")
+            for index in range(len(list2)):
+                if count_2 == 0:
+                    print('sip: ', end=" ")
+                print(list2[index].source_ip)
+                count_2 = 1
+            if count_2 == 1:
+                print('sip: ', end=" ")
+                for index in range(len(list2)):
+                    print(list2[index].source_ip)
+                print('パス： ', end=" ")
+                print(list2[0].requests)
+                print("パターン:複数目標、複数ポート")
+        else:  # ポート特徴あり
+            count_1 = 0  # 同じパスで、目標ハニーポット、目標ポート、4つパターン
+            count_2 = 0
+            count_3 = 0
+            count_4 = 0
+            output_list2 = []
+            output_list3 = []
+            for index in range(len(list1)):
+                if list1[index].destination_port != kport:
+                    output_list2.append(list1[index])
+                    count_2 = 1
+                else:
+                    if count_1 == 0:
+                        print('sip: ', end=" ")
+                    print(list1[index].source_ip)
+                    count_1 = 1
+            if count_1 == 1:
+                print('deip: ', end=" ")
+                print(kip)
+                print('deport: ', end=" ")
+                print(kport)
+                print('パス： ', end=" ")
+                print(list1[0].requests)
+                print("パターン:特定目標、特定ポート")
+            if count_2 == 1:
+                print('sip: ', end=" ")
+                for index in range(len(output_list2)):
+                    print(output_list2[index].source_ip)
+                print('deip: ', end=" ")
+                print(kip)
+                print('パス： ', end=" ")
+                print(list1[0].requests)
+                print("特定目標、複数ポート")
+            for index in range(len(list2)):
+                if list1[index].destination_port != kport:
+                    output_list3.append(list2[index])
+                    count_4 = 1
+                else:
+                    if count_3 == 0:
+                        print('sip: ', end=" ")
+                    print(list2[index].source_ip)
+                    count_3 = 1
+            if count_3 == 1:
+                print('deport: ', end=" ")
+                print(kport)
+                print('パス： ', end=" ")
+                print(list1[0].requests)
+                print("パターン:複数目標、特定ポート")
+            if count_4 == 1:
+                print('sip: ', end=" ")
+                for index in range(len(output_list3)):
+                    print(output_list3[index].source_ip)
+                print('パス： ', end=" ")
+                print(list2[0].requests)
+                print("複数目標、複数ポート")
 
 
 def get_deip():
@@ -224,7 +316,10 @@ def get_deip():
             del ip_list_bk[index]
             index = index - 1
         else:
-            print('sip: ' + ip_list_bk[index].source_ip + '---dip: ' + ip_list_bk[index].destination_ip)
+            print('sip: ', end=" ")
+            print(ip_list_bk[index].source_ip, end=" ")
+            print('---dip: ', end=" ")
+            print(deip)
     print("複数ソースが同じハニーポットを狙う特徴があるのか？なければ0を入力")
     kip = input()
     if kip == 0:
