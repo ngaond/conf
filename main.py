@@ -197,10 +197,11 @@ def get_deport(n, list1, list2, kip):
 
 def get_deip():
     global output_list
-    ipde = []
+    global ip_list
     ip_list_bk = ip_list
     i = 0
     for index in range(len(ip_list_bk)):
+        sip = ''
         sip = ip_list_bk[index].source_ip
         query = {
             'query':
@@ -221,11 +222,10 @@ def get_deip():
             del ip_list_bk[index]
             index = index - 1
         else:
-            ipde.append(deip[0])
-    print(ipde)
-    print("複数ソースから同じハニーポットを狙う特徴があるのか？一番多いのハニーポットIpを入力してください")
+            print('sip: ' + ip_list[index].source_ip + '---dip: ' + ip_list[index].destination_ip)
+    print("複数ソースが同じハニーポットを狙う特徴があるのか？なければ0を入力")
     kip = input()
-    if kip == '':
+    if kip == 0:
         get_deport("0", ip_list_bk, output_list, kip)
     else:
         for index in range(len(ip_list_bk)):
@@ -257,7 +257,7 @@ def group_analysis1(a, group):
                     ip_list.append(b)
                     badip_list.remove(badip)
         get_deip()
-        #for index in range(len(ip_list)):
+        # for index in range(len(ip_list)):
         #    badip_list.remove(ip_list[index].source_ip)
     if group == "not bad":
         query = {
@@ -363,18 +363,18 @@ def group_analysis2(a, group):
             }
             }
             for index in a.requests:
-                query['query']['bool']['should'].append({'match_phrase': {'request': a.requests[index]}})
+                query['query']['bool']['should'].append({'match_phrase': {'request': index}})
             #   query1['query']['bool']['should'].append({'match_phrase': {'request': a.requests[index]}})
             result = es.search(index="xpot_accesslog-2021.01", body=query, size=1)
             # result1 = es.search(index="xpot_accesslog-2021.01", body=query, size=100)
             if len(result["hits"]["hits"]) != 0:
                 ipl.append(badip)
                 ncount = ncount + 1
-                for index in range(len(a.requests)):
+                for index in a.requests:
                     query1 = {'query': {
                         'bool': {'must': [{'term': {'@timestamp': '2021-01-17'}}, {'term': {'source_ip': badip}}
                                           ],
-                                 'must': {'terms': {'request.keyword': a.requests[index]}},
+                                 'must': {'terms': {'request.keyword': index}},
                                  }
                     }}
                     result = es.search(index="xpot_accesslog-2021.01", body=query1, size=1)
@@ -386,7 +386,7 @@ def group_analysis2(a, group):
                     judge = input()
                     if judge == 0:
                         ipl.remove(badip)
-                    #elif judge == 1:
+                    # elif judge == 1:
                     #    if len(result1["hits"]["hits"]) != 0:
                     #        for n in result1["hits"]["hits"]:
                     #            a.requests.append(n["_source"]["result"])
@@ -399,7 +399,7 @@ def group_analysis2(a, group):
                 else:
                     ipl.remove(badip)
         for index in ipl:
-            badip_list.remove(ipl[index])
+            badip_list.remove(index)
         print(ipl)
         print(a.requests)
     else:
@@ -476,9 +476,9 @@ def group_analysis2(a, group):
                  }
         }
         for index in a.requests:
-            query['query']['bool']['should'].append({'match_phrase': {'request': a.requests[index]}})
+            query['query']['bool']['should'].append({'match_phrase': {'request': index}})
         result = es.search(index="xpot_accesslog-2021.01", body=query, size=1)
-        if  len(result["hits"]["hits"]) != 0:
+        if len(result["hits"]["hits"]) != 0:
             ncount = ncount + 1
     if ncount >= (len(a.requests) / 2) and len(a.requests) > 6:
         print(ipl)
@@ -579,13 +579,13 @@ def get_path2(a, sip):
                     'must': [
                         {'term': {'@timestamp': '2021-01-17'}}, {'term': {'source_ip': sip}}
                     ],
-                    'must_not':  ''
+                    'must_not': ''
 
                 }
                 }
         }
         for index in a.requests:
-            query['query']['bool']['must_not'].append({'match_phrase': {'request': a.requests[index]}})
+            query['query']['bool']['must_not'].append({'match_phrase': {'request': index}})
         result = es.search(index="xpot_accesslog-2021.01", body=query, size=1)
         m = len(result["hits"]["hits"])
         result2 = es.search(index="xpot_accesslog-2021.01", body=query, size=2000)
@@ -649,7 +649,7 @@ if __name__ == "__main__":
             ip_list.append(a)
             group_analysis1(a, "bad")
         else:  # 複数システムを狙う
-            badip_list.remove(ip)
+            badip_list.remove(badip)
             ip_list.append(a)
             group_analysis2(a, "bad")
     # get_onerequest()
