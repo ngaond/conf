@@ -94,29 +94,27 @@ def get_path(a, ip):
     global count
     m = 1
     # パス種類判断
+    query = {
+        'query':
+            {'bool': {
+                'must': [
+                    {'term': {'@timestamp': '2021-01-17'}}, {'term': {'source_ip': ip}}],
+                'must_not': [
+                    {'match_phrase': {'request': '/.env'}},
+                    {'match_phrase': {'request': 'HEAD / HTTP/1.0'}},
+                    {'match_phrase': {'request': 'HEAD / HTTP/1.1'}},
+                    {'match_phrase': {'request': 'POST / HTTP/1.0'}},
+                    {'match_phrase': {'request': 'POST / HTTP/1.1'}},
+                    {'match_phrase': {'request': 'GET / HTTP/1.0'}},
+                    {'match_phrase': {'request': 'GET / HTTP/1.1'}},
+                    {'match_phrase': {'request': '/Nmap'}},
+                    {'match_phrase': {'request': '/favicon.ico'}},
+                    {'match_phrase': {'request': 'GET /version HTTP/1.1'}}
+                ]
+            }}
+
+    }
     while m != 0:
-        query = {
-            'query':
-                {'bool': {
-                    'must': [
-                        {'term': {'@timestamp': '2021-01-17'}}, {'term': {'source_ip': ip}}],
-                    'must_not': [
-                        {'match_phrase': {'request': '/.env'}},
-                        {'match_phrase': {'request': 'HEAD / HTTP/1.0'}},
-                        {'match_phrase': {'request': 'HEAD / HTTP/1.1'}},
-                        {'match_phrase': {'request': 'POST / HTTP/1.0'}},
-                        {'match_phrase': {'request': 'POST / HTTP/1.1'}},
-                        {'match_phrase': {'request': 'GET / HTTP/1.0'}},
-                        {'match_phrase': {'request': 'GET / HTTP/1.1'}},
-                        {'match_phrase': {'request': '/Nmap'}},
-                        {'match_phrase': {'request': '/favicon.ico'}},
-                        {'match_phrase': {'request': 'GET /version HTTP/1.1'}}
-                    ]
-
-                }}
-
-        }
-
         result = es.search(index="xpot_accesslog-2021.01", body=query, size=1)
         m = len(result["hits"]["hits"])
         if (m) != 0:
@@ -562,8 +560,7 @@ def get_path2(a, sip):
                     'must': [
                         {'term': {'@timestamp': '2021-01-17'}}, {'term': {'source_ip': sip}}
                     ],
-                    'must_not':
-                        ''
+                    'must_not':  ''
 
                 }
                 }
