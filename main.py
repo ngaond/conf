@@ -92,7 +92,6 @@ def get_badip():
 def get_path(a, ip):
     global badip_list
     global count
-    request1 = "'/favicon.ico'"
     m = 1
     # パス種類判断
     while m != 0:
@@ -110,8 +109,8 @@ def get_path(a, ip):
                         {'match_phrase': {'request': 'GET / HTTP/1.0'}},
                         {'match_phrase': {'request': 'GET / HTTP/1.1'}},
                         {'match_phrase': {'request': '/Nmap'}},
-                        {'match_phrase': {'request': 'GET /version HTTP/1.1'}},
-                        {'match_phrase': {'request': ''+request1}}
+                        {'match_phrase': {'request': '/favicon.ico'}},
+                        {'match_phrase': {'request': 'GET /version HTTP/1.1'}}
                     ]
 
                 }}
@@ -127,8 +126,7 @@ def get_path(a, ip):
             kaka = input()
             # a.requestq = a.requestq + ",'" + kaka + "'"
             a.requests.append(kaka)
-            request1 = request1 + "}}, {'match_phrase': {'request': '" + kaka + "'"
-            print(request1)
+            query['query']['bool']['must_not'].append({'match_phrase': {'request': kaka}})
             # print(a.requestq)
             j = 1
             if count != 0:
@@ -354,9 +352,11 @@ def group_analysis2(a, group):
             query = {'query': {
                 'bool': {'must': [{'term': {'@timestamp': '2021-01-17'}}, {'term': {'source_ip': badip}}
                                   ],
-                         'should': {'terms': {'request.keyword': a.requests}},
-                         }
-            }}
+                         'should': ''},
+            }
+            }
+            for index in a.requests:
+                query['query']['bool']['should'].append({'match_phrase': {'request': a.requests[index]}})
             result = es.search(index="xpot_accesslog-2021.01", body=query, size=1)
             if result != '':
                 ipl.append(badip)
@@ -365,11 +365,11 @@ def group_analysis2(a, group):
                     query = {'query': {
                         'bool': {'must': [{'term': {'@timestamp': '2021-01-17'}}, {'term': {'source_ip': badip}}
                                           ],
-                                 'should': {'terms': {'request.keyword': a.requests[index]}},
+                                 'must': {'terms': {'request.keyword': a.requests[index]}},
                                  }
                     }}
                     result = es.search(index="xpot_accesslog-2021.01", body=query, size=1)
-                    if result != '':
+                    if len(result["hits"]["hits"]) != 0:
                         ncount = ncount + 1
                 if ncount >= (len(a.requests) / 2) and len(a.requests) > 6:
                     print(ipl)
@@ -393,7 +393,7 @@ def group_analysis2(a, group):
                      {'must':
                           {'term': {'@timestamp': '2021-01-17'}},
                       'should':
-                          {'terms': {'request.keyword': a.requests}},
+                          '',
                       'must_not': [
                           {'terms': {
                               "source_ip": ['185.163.109.66 ', '198.20.69.74 ', '198.20.69.98 ', '198.20.87.98 ',
@@ -458,8 +458,10 @@ def group_analysis2(a, group):
                       }
                  }
         }
+        for index in a.requests:
+            query['query']['bool']['should'].append({'match_phrase': {'request': a.requests[index]}})
         result = es.search(index="xpot_accesslog-2021.01", body=query, size=1)
-        if result != '':
+        if  len(result["hits"]["hits"]) != 0:
             ncount = ncount + 1
     if ncount >= (len(a.requests) / 2) and len(a.requests) > 6:
         print(ipl)
@@ -526,13 +528,16 @@ def get_ip2():
                                                '74.120.14.96', '185.220.101.51', '46.254.20.36', '185.220.100.252',
                                                '162.142.125.128']}},  # shodan and censys
 
-                      {'terms':
-                           {'request.keyword': ['HEAD / HTTP/1.0', 'HEAD / HTTP/1.1', 'POST / HTTP/1.0',
-                                                'POST / HTTP/1.1',
-                                                'GET / HTTP/1.0', 'GET / HTTP/1.1', '/favicon.ico', '/.env', '/Nmap',
-                                                'OPTIONS / HTTP/1.0', 'OPTIONS / HTTP/1.1', 'GET /version HTTP/1.1']
-                            }
-                       }
+                      {'match_phrase': {'request': '/.env'}},
+                      {'match_phrase': {'request': 'HEAD / HTTP/1.0'}},
+                      {'match_phrase': {'request': 'HEAD / HTTP/1.1'}},
+                      {'match_phrase': {'request': 'POST / HTTP/1.0'}},
+                      {'match_phrase': {'request': 'POST / HTTP/1.1'}},
+                      {'match_phrase': {'request': 'GET / HTTP/1.0'}},
+                      {'match_phrase': {'request': 'GET / HTTP/1.1'}},
+                      {'match_phrase': {'request': '/Nmap'}},
+                      {'match_phrase': {'request': 'GET /version HTTP/1.1'}}
+
                   ],
                   'must_not': {'terms': {'source_ip': ip_string}}
                   }
@@ -558,11 +563,13 @@ def get_path2(a, sip):
                         {'term': {'@timestamp': '2021-01-17'}}, {'term': {'source_ip': sip}}
                     ],
                     'must_not':
-                        {'terms': {'request.keyword': a.requests}}
+                        ''
 
                 }
                 }
         }
+        for index in a.requests:
+            query['query']['bool']['must_not'].append({'match_phrase': {'request': a.requests[index]}})
         result = es.search(index="xpot_accesslog-2021.01", body=query, size=1)
         m = len(result["hits"]["hits"])
         result2 = es.search(index="xpot_accesslog-2021.01", body=query, size=2000)
