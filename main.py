@@ -92,7 +92,7 @@ def get_path(ip):
     global count
     global ip_list
     m = 1
-    a=Requests()
+    a = Requests()
     a.source_ip = ip
     # パス種類判断
     query = {
@@ -127,7 +127,6 @@ def get_path(ip):
             kaka = input()
             # a.requestq = a.requestq + ",'" + kaka + "'"
             a.requests.append(kaka)
-            print(a.requests)
             query['query']['bool']['must_not'].append({'match_phrase': {'request': kaka}})
             # print(a.requestq)
             j = 1
@@ -146,8 +145,9 @@ def get_deport(n, list1, list2, kip):
     global ip_list
     deport = []
     ip_list_bk = ip_list
-    for index in range(len(ip_list_bk)):
-        sip = ip_list_bk[index].source_ip
+    m = 0
+    while m < len(ip_list_bk):
+        sip = ip_list_bk[m].source_ip
         query = {
             'query':
                 {'bool':
@@ -159,16 +159,17 @@ def get_deport(n, list1, list2, kip):
         }
         result = es.search(index="xpot_accesslog-2021.01", body=query, size=10000)
         for log in result["hits"]["hits"]:
-            deport.append(log[0]["_source"]["destination_port"])
+            deport.append(log["_source"]["destination_port"])
         deport = list(set(deport))
         if len(deport) > 3:
-            output_list.append(ip_list_bk[index])
-            del ip_list_bk[index]
+            output_list.append(ip_list_bk[m])
+            del ip_list_bk[m]
         else:
             print('sip: ', end=" ")
-            print(ip_list_bk[index].source_ip, end=" ")
+            print(ip_list_bk[m].source_ip, end=" ")
             print('---dport: ', end=" ")
             print(deport)
+            m = m + 1
     print("複数ソースが同じポートを狙う特徴があるのか？なければ0を入力")
     kport = input()
     # output
@@ -296,7 +297,8 @@ def get_deip():
     global ip_list
     ip_list_bk = ip_list
     deip = []
-    for m in range(len(ip_list_bk)):
+    m = 0
+    while m < len(ip_list_bk):
         sip = ''
         sip = ip_list_bk[m].source_ip
         query = {
@@ -320,6 +322,7 @@ def get_deip():
             print(ip_list_bk[m].source_ip, end=" ")
             print('---dip: ', end=" ")
             print(deip)
+            m = m + 1
     print("複数ソースが同じハニーポットを狙う特徴があるのか？なければ0を入力")
     kip = input()
     if kip == 0:
@@ -698,7 +701,7 @@ def get_path2(a, sip):
             if j == 1:
                 a.destination_port.append(result["hits"]["hits"][0]["_source"]["destination_port"])
                 a.destination_ip.append(result["hits"]["hits"][0]["_source"]["destination_ip"])
-                a.source_ip=result["hits"]["hits"][0]["_source"]["source_ip"]
+                a.source_ip = result["hits"]["hits"][0]["_source"]["source_ip"]
                 count = count + 1
                 badip_list.remove(a.source_ip)
     return a
@@ -742,7 +745,6 @@ if __name__ == "__main__":
         if count == 1:  # パス一種類だけ
             badip_list.remove(badip)
             ip_list.append(a)
-            print(ip_list[0].destination_port)
             group_analysis1(a, "bad")
         else:  # 複数システムを狙う
             badip_list.remove(badip)
