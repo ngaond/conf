@@ -134,7 +134,6 @@ def get_path(a, ip):
                 a.destination_port.append(result["hits"]["hits"][0]["_source"]["destination_port"])
                 a.destination_ip.append(result["hits"]["hits"][0]["_source"]["destination_ip"])
                 count = count + 1
-    badip_list.remove(ip)
     return a
 
 
@@ -256,9 +255,10 @@ def group_analysis1(a, group):
                 b = get_path(b, badip)
                 if count == 1:
                     ip_list.append(b)
+                    badip_list.remove(badip)
         get_deip()
-        for index in range(len(ip_list)):
-            badip_list.remove(ip_list[index].source_ip)
+        #for index in range(len(ip_list)):
+        #    badip_list.remove(ip_list[index].source_ip)
     if group == "not bad":
         query = {
             'query':
@@ -346,6 +346,7 @@ def group_analysis2(a, group):
     global ip_string
     global badip_list
     ipl = []
+    ipl.append(a.source_ip[0])
     if group == "bad":
         for badip in badip_list:
             ncount = 0
@@ -355,10 +356,18 @@ def group_analysis2(a, group):
                          'should': ''},
             }
             }
+            query1 = {'query': {
+                'bool': {'must': [{'term': {'@timestamp': '2021-01-17'}}, {'term': {'source_ip': badip}}
+                                  ],
+                         'must_not': ''},
+            }
+            }
             for index in a.requests:
                 query['query']['bool']['should'].append({'match_phrase': {'request': a.requests[index]}})
+            #   query1['query']['bool']['should'].append({'match_phrase': {'request': a.requests[index]}})
             result = es.search(index="xpot_accesslog-2021.01", body=query, size=1)
-            if result != '':
+            # result1 = es.search(index="xpot_accesslog-2021.01", body=query, size=100)
+            if len(result["hits"]["hits"]) != 0:
                 ipl.append(badip)
                 ncount = ncount + 1
                 for index in range(len(a.requests)):
@@ -373,16 +382,24 @@ def group_analysis2(a, group):
                         ncount = ncount + 1
                 if ncount >= (len(a.requests) / 2) and len(a.requests) > 6:
                     print(ipl)
-                    print("重ねたパスが多いので、手で調べてください,関連がれば1、なければ0を入力してください")
-                    if input() == 0:
+                    print("同じパス多い、関連性を判断してください,関連がれば1、なければ0を入力してください")
+                    judge = input()
+                    if judge == 0:
                         ipl.remove(badip)
+                    #elif judge == 1:
+                    #    if len(result1["hits"]["hits"]) != 0:
+                    #        for n in result1["hits"]["hits"]:
+                    #            a.requests.append(n["_source"]["result"])
                 elif len(a.requests) < 6 and ncount >= (len(a.requests)) - 1:
                     print(ipl)
-                    print("重ねたパスが多いので、手で調べてください,関連がれば1、なければ0を入力してください")
-                    if input() == 0:
+                    print("同じパス多い、関連性を判断してください,関連がれば1、なければ0を入力してください")
+                    judge = input()
+                    if judge == 0:
                         ipl.remove(badip)
                 else:
                     ipl.remove(badip)
+        for index in ipl:
+            badip_list.remove(ipl[index])
         print(ipl)
         print(a.requests)
     else:
@@ -628,8 +645,11 @@ if __name__ == "__main__":
         output_list = []
         a = get_path(a, badip)
         if count == 1:  # パス一種類だけ
+            badip_list.remove(badip)
+            ip_list.append(a)
             group_analysis1(a, "bad")
         else:  # 複数システムを狙う
+            badip_list.remove(ip)
             ip_list.append(a)
             group_analysis2(a, "bad")
     # get_onerequest()
