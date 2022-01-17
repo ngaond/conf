@@ -242,6 +242,7 @@ def group_analysis1(a, group):
     # パス一種類のみ
     if group == "bad":
         for badip in badip_list:
+            count = 0
             query = {'query': {
                 'bool': {'must': [{'term': {'@timestamp': '2021-01-17'}},
                                   {'match_phrase': {'request.keyword': a.requests[0]}},
@@ -250,11 +251,11 @@ def group_analysis1(a, group):
                          }
             }}
             result = es.search(index="xpot_accesslog-2021.01", body=query, size=1)
-            b = Requests()
-            count = 0
-            b = get_path(b, badip)
-            if count == 1:
-                ip_list.append(b)
+            if len(result["hits"]["hits"]) != 0:
+                b = Requests()
+                b = get_path(b, badip)
+                if count == 1:
+                    ip_list.append(b)
         get_deip()
         for index in range(len(ip_list)):
             badip_list.remove(ip_list[index].source_ip)
@@ -331,11 +332,13 @@ def group_analysis1(a, group):
                 }
         }
         result = es.search(index="xpot_accesslog-2021.01", body=query, size=1)
-        b = Requests()
-        b = get_path2(b, result["hits"]["hits"][0]["_source"]["source_ip"])
-        if count == 1:
-            ip_list.append(b)
-            ip_string.append(b.source_ip)
+        if len(result["hits"]["hits"]) != 0:
+            b = Requests()
+            count = 0
+            b = get_path2(b, result["hits"]["hits"][0]["_source"]["source_ip"])
+            if count == 1:
+                ip_list.append(b)
+                ip_string.append(b.source_ip)
         get_deip()
 
 
