@@ -43,11 +43,9 @@ def init_day():  # 日設定
 
 def get_badip():  # 攻撃（悪意フラグ）ip抽出
     global badip_list
-    global one_request_ip_list
     global day1
     global day2
     log = 'TEST'
-    # while len(ip_string) < 100:
     query = {'query':
                  {'bool':
                       {'must':
@@ -76,8 +74,9 @@ def get_badip():  # 攻撃（悪意フラグ）ip抽出
         log = result["hits"]["hits"]
         if len(log) != 0:
             query['query']['bool']['must_not'].append({'match_phrase': {'source_ip': log[0]["_source"]["source_ip"]}})
-            # ip_string.append(log["_source"]["source_ip"])
             badip_list.append(log[0]["_source"]["source_ip"])
+            print(log[0]["_source"]["source_ip"])
+            print(log[0]["_source"]["url.keyword"])
     print('攻撃活動のip数')
     print(len(badip_list))
 
@@ -150,20 +149,22 @@ def get_de(request):  # 目標ハニーポット・ポート数調査
             }
     }
     while len(log) != 0:  # 目標ハニーポット数
-        deip = []
+        deip = []  # 目標ハニーポットのリスト
         result = es.search(index=day1, body=query, size=1)
         log = result["hits"]["hits"]
         if len(log) != 0:
-            deip.append(log[0]["_source"]["destination_ip"])
-            request.destination_ip.append(log[0]["_source"]["destination_ip"])
-            query['query']['bool']['must_not'].append(
-                {'match_phrase': {'destination_ip': log[0]["_source"]["destination_ip"]}})
-        if len(deip) == 1:
-            flag1 = 1
-        elif len(deip) != 0:
-            print('data error')
-        else:
-            flag1 = 2
+            if len(deip) == 0:
+                deip.append(log[0]["_source"]["destination_ip"])
+                request.destination_ip.append(log[0]["_source"]["destination_ip"])
+                query['query']['bool']['must_not'].append(
+                    {'match_phrase': {'destination_ip': log[0]["_source"]["destination_ip"]}})
+            elif len(deip) == 1:
+                log = []
+                flag2 = 2
+    if len(deip) == 1:
+        flag1 = 1
+    elif len(deip) != 0:
+        print('data error')
     query = {
         'query':
             {'bool': {
@@ -176,20 +177,22 @@ def get_de(request):  # 目標ハニーポット・ポート数調査
     }
     log = 'test'
     while len(log) != 0:  # 目標ポート数
-        deport = []
+        deport = []  # 目標ポートのリスト
         result = es.search(index=day1, body=query, size=1)
         log = result["hits"]["hits"]
         if len(log) != 0:
-            deport.append(log[0]["_source"]["destination_port"])
-            request.destination_ip.append(log[0]["_source"]["destination_port"])
-            query['query']['bool']['must_not'].append(
-                {'match_phrase': {'destination_port': log[0]["_source"]["destination_port"]}})
-        if len(deport) == 1:
-            flag2 = 1
-        elif len(deport) != 0:
-            print('data error')
-        else:
-            flag2 = 2
+            if len(deport) == 0:
+                deport.append(log[0]["_source"]["destination_port"])
+                request.destination_ip.append(log[0]["_source"]["destination_port"])
+                query['query']['bool']['must_not'].append(
+                    {'match_phrase': {'destination_port': log[0]["_source"]["destination_port"]}})
+            elif len(deport) == 1:
+                log = []
+                flag2 = 2
+    if len(deport) == 1:
+        flag2 = 1
+    elif len(deport) != 0:
+        print('data error')
 
 
 def group_analysis1(request):  # パターン分類関数1
@@ -202,6 +205,7 @@ def group_analysis1(request):  # パターン分類関数1
     flag1 = 0
     flag2 = 0
     get_de(request)  # 目標ハニーポット・ポート数調査
+    # パターン分類
     if flag1 == 1 and flag2 == 1:
         output.pattern1_1_a.append(request.source_ip)
     elif flag1 == 1 and flag2 == 2:
@@ -212,7 +216,7 @@ def group_analysis1(request):  # パターン分類関数1
         output.pattern1_1_d.append(request.source_ip)
 
 
-def group_analysis2(request):  # 複数パスの場合，同じパス使用のipがグループになる
+def group_analysis2(request):  # 複数パスの場合，同じパス使用のipがグループになるが，先に2-1-a～2-1-dに分類
     global flag1
     global flag2
     global count
@@ -237,7 +241,7 @@ def group_analysis2(request):  # 複数パスの場合，同じパス使用のip
         output.pattern2_1_d.append(request.source_ip)
 
 
-def get_group():
+def get_group():  # 2-1-a～2-1-dから同じパス使用のipがグループになって，2-2に変更
     global output
     ip_n = 0
     while len(path_ip) > ip_n:
@@ -266,7 +270,7 @@ def get_group():
         ip_n = ip_n + 1
 
 
-def result():
+def pattern_result():
     global output
     print('パターン1-1-aのip数')
     print(len(output.pattern1_1_a))
@@ -344,4 +348,4 @@ if __name__ == "__main__":
             badip_list.remove(badip)
             n = n + 1
     get_group()
-    result()  # 各パターンのip数
+    pattern_result()  # 各パターンのip数
