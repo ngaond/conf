@@ -51,20 +51,20 @@ def get_badip():  # 攻撃（悪意フラグ）ip抽出
                       {'must':
                            {'term': {'@timestamp': day2}},
                        'should': [
-                           {'regexp': {'request': '.*wget.*http.*:[0-9].*'}},
-                           {'regexp': {'request': '.*curl.*http.*:[0-9].*'}},
-                           {'regexp': {'request': '.*fetch.*http.*:[0-9].*'}},
-                           {'regexp': {'request': '.*java.net.URL.*http.*:[0-9].*'}},
-                           {'regexp': {'request': '.*urlopen.*http.*:[0-9].*'}},
-                           {'regexp': {'request': '.*bitsadmin.*http.*:[0-9].*'}},
-                           {'regexp': {'request': '.*explorer.*http.*:[0-9].*'}},
-                           {'regexp': {'request': '.*certutil.*http.*:[0-9].*'}},
-                           {'regexp': {'request': '.*Wscript.*http.*:[0-9].*'}},
-                           {'regexp': {'request': '.*getstore.*http.*:[0-9].*'}},
-                           {'regexp': {'request': '.*HTTP.start.*http.*:[0-9].*'}},
-                           {'regexp': {'request': '.*lwp-download.*http.*:[0-9].*'}},
-                           {'regexp': {'request': '.*objXMLHTTP.*http.*:[0-9].*'}},
-                           {'regexp': {'request': '.*mshta.*http.*:[0-9].*'}}
+                           {'regexp': {'request.keyword': '.*wget.*http.*:[0-9].*'}},
+                           {'regexp': {'request.keyword': '.*curl.*http.*:[0-9].*'}},
+                           {'regexp': {'request.keyword': '.*fetch.*http.*:[0-9].*'}},
+                           {'regexp': {'request.keyword': '.*java.net.URL.*http.*:[0-9].*'}},
+                           {'regexp': {'request.keyword': '.*urlopen.*http.*:[0-9].*'}},
+                           {'regexp': {'request.keyword': '.*bitsadmin.*http.*:[0-9].*'}},
+                           {'regexp': {'request.keyword': '.*explorer.*http.*:[0-9].*'}},
+                           {'regexp': {'request.keyword': '.*certutil.*http.*:[0-9].*'}},
+                           {'regexp': {'request.keyword': '.*Wscript.*http.*:[0-9].*'}},
+                           {'regexp': {'request.keyword': '.*getstore.*http.*:[0-9].*'}},
+                           {'regexp': {'request.keyword': '.*HTTP.start.*http.*:[0-9].*'}},
+                           {'regexp': {'request.keyword': '.*lwp-download.*http.*:[0-9].*'}},
+                           {'regexp': {'request.keyword': '.*objXMLHTTP.*http.*:[0-9].*'}},
+                           {'regexp': {'request.keyword': '.*mshta.*http.*:[0-9].*'}}
                        ],
                        'must_not': [
                            {'match_phrase': {'source_ip': '0'}}
