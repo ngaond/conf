@@ -704,6 +704,7 @@ if __name__ == "__main__":
     global flag2
     flag2 = 0
     get_badip()  # 攻撃（悪意フラグ）ipの抽出
+'''
     for badip in badip_list:  # ipごとに活動パターン調査
         # ipの行為データをRequests(object)に保存
         a = Requests()
@@ -730,3 +731,5 @@ if __name__ == "__main__":
         path = path + k
         k = input()
     loopcount = 0
+'''
+
