@@ -53,8 +53,8 @@ def get_badip():  # 攻撃（悪意フラグ）ip抽出
                        'should': [
                            {'regexp': {'request.keyword': '.*wget.*http.*:[0-9].*'}},
                            {'regexp': {'request.keyword': '.*curl.*http.*:[0-9].*'}},
-                           {'regexp': {'request.keyword': '.*fetch.*http.*:[0-9].*'}},
-                           {'regexp': {'request.keyword': '.*java.net.URL.*http.*:[0-9].*'}},
+                           {'regexp': {'request.keyword': '.*fetch.*http.*:[0-9].*'}}
+'''                           {'regexp': {'request.keyword': '.*java.net.URL.*http.*:[0-9].*'}},
                            {'regexp': {'request.keyword': '.*urlopen.*http.*:[0-9].*'}},
                            {'regexp': {'request.keyword': '.*bitsadmin.*http.*:[0-9].*'}},
                            {'regexp': {'request.keyword': '.*explorer.*http.*:[0-9].*'}},
@@ -64,7 +64,7 @@ def get_badip():  # 攻撃（悪意フラグ）ip抽出
                            {'regexp': {'request.keyword': '.*HTTP.start.*http.*:[0-9].*'}},
                            {'regexp': {'request.keyword': '.*lwp-download.*http.*:[0-9].*'}},
                            {'regexp': {'request.keyword': '.*objXMLHTTP.*http.*:[0-9].*'}},
-                           {'regexp': {'request.keyword': '.*mshta.*http.*:[0-9].*'}}
+                           {'regexp': {'request.keyword': '.*mshta.*http.*:[0-9].*'}}'''
                        ],
                        'must_not': [
                            {'match_phrase': {'source_ip': '0'}}
