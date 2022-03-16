@@ -76,7 +76,7 @@ def get_badip():  # 攻撃（悪意フラグ）ip抽出
             query['query']['bool']['must_not'].append({'match_phrase': {'source_ip': log[0]["_source"]["source_ip"]}})
             badip_list.append(log[0]["_source"]["source_ip"])
             print(log[0]["_source"]["source_ip"])
-            print(log[0]["_source"]["url.keyword"])
+            print(log[0]["_source"]["url"])
     print('攻撃活動のip数')
     print(len(badip_list))
 
