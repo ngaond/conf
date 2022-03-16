@@ -17,7 +17,7 @@ def init_day():
     global day2
     print('年入力')
     year = input()
-    print('月入力')
+    print('月入力(1月なら01)')
     month = input()
     print('日入力')
     day = input()
@@ -54,8 +54,9 @@ def get_badip():  # 攻撃（悪意フラグ）ip
                                {'regexp': {'request': '.*objXMLHTTP.*http.*:[0-9].*'}},
                                {'regexp': {'request': '.*mshta.*http.*:[0-9].*'}}
                            ],
-                           'must_not':
-                               {'match_phrase': {'source_ip': '0'}}}}}
+                           'must_not':[
+                               {'match_phrase': {'source_ip': '0'}}
+                           ]}}}
         result = es.search(index=day1, body=query, size=1)
         log = result["hits"]["hits"]
         if len(log) != 0:
