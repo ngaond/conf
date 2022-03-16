@@ -61,6 +61,33 @@ def get_badip():  # 攻撃（悪意フラグ）ip抽出
                            {'bool': {
                                'must': [{'regexp': {'request.keyword': '.*java.net.URL.*http.*:[0-9].*'}},
                                         {'match': {'@timestamp': day2}}]}},
+                           {'bool': {
+                               'must': [{'regexp': {'request.keyword': '.*bitsadmin.*http.*:[0-9].*'}},
+                                        {'match': {'@timestamp': day2}}]}},
+                           {'bool': {
+                               'must': [{'regexp': {'request.keyword': '.*explorer.*http.*:[0-9].*'}},
+                                        {'match': {'@timestamp': day2}}]}},
+                           {'bool': {
+                               'must': [ {'regexp': {'request.keyword': '.*certutil.*http.*:[0-9].*'}},
+                                        {'match': {'@timestamp': day2}}]}},
+                           {'bool': {
+                               'must': [{'regexp': {'request.keyword': '.*Wscript.*http.*:[0-9].*'}},
+                                        {'match': {'@timestamp': day2}}]}},
+                           {'bool': {
+                               'must': [{'regexp': {'request.keyword': '.*lwp-download.*http.*:[0-9].*'}},
+                                        {'match': {'@timestamp': day2}}]}},
+                           {'bool': {
+                               'must': [{'regexp': {'request.keyword': '.*HTTP.start.*http.*:[0-9].*'}},
+                                        {'match': {'@timestamp': day2}}]}},
+                           {'bool': {
+                               'must': [{'regexp': {'request.keyword': '.*getstore.*http.*:[0-9].*'}},
+                                        {'match': {'@timestamp': day2}}]}},
+                           {'bool': {
+                               'must': [{'regexp': {'request.keyword': '.*mshta.*http.*:[0-9].*'}},
+                                        {'match': {'@timestamp': day2}}]}},
+                           {'bool': {
+                               'must': [{'regexp': {'request.keyword': '.*objXMLHTTP.*http.*:[0-9].*'}},
+                                        {'match': {'@timestamp': day2}}]}},
                            {'bool':{
                                'must':[{'regexp': {'request.keyword': '.*urlopen.*http.*:[0-9].*'}},
                                        {'match': {'@timestamp': day2}}]}}],
@@ -113,7 +140,7 @@ def get_path(ip):  # パス種類数調査
             {'bool': {
                 'must': [
                     {'term': {'@timestamp': day2}}, {'term': {'source_ip': ip}}],
-                'must_not': [{'match_phrase': {'url.keyword': '/'}}  # パス'/'が対象外
+                'must_not': [{'match_phrase': {'url': '/'}}  # パス'/'が対象外
                              ]
             }}
     }
@@ -122,9 +149,9 @@ def get_path(ip):  # パス種類数調査
         m = result["hits"]["hits"]
         if len(m) != 0:
             print(result["hits"]["hits"][0]["_source"]["source_ip"])
-            print(result["hits"]["hits"][0]["_source"]["url.keyword"])
-            a.path.append(m[0]["_source"]["url.keyword"])
-            query['query']['bool']['must_not'].append({'match_phrase': {'url.keyword': m[0]["_source"]["url.keyword"]}})
+            print(result["hits"]["hits"][0]["_source"]["url"])
+            a.path.append(m[0]["_source"]["url"])
+            query['query']['bool']['must_not'].append({'match_phrase': {'url': m[0]["_source"]["url"]}})
             count = count + 1
     return a
 
@@ -141,7 +168,7 @@ def get_de(request):  # 目標ハニーポット・ポート数調査
             {'bool': {
                 'must': [
                     {'term': {'@timestamp': day2}}, {'term': {'source_ip': ip}}],
-                'must_not': [{'match_phrase': {'url.keyword': '/'}}  # パス'/'が対象外
+                'must_not': [{'match_phrase': {'url': '/'}}  # パス'/'が対象外
                              ]
             }
             }
@@ -168,7 +195,7 @@ def get_de(request):  # 目標ハニーポット・ポート数調査
             {'bool': {
                 'must': [
                     {'term': {'@timestamp': day2}}, {'term': {'source_ip': ip}}],
-                'must_not': [{'match_phrase': {'url.keyword': '/'}}  # パス'/'が対象外
+                'must_not': [{'match_phrase': {'url': '/'}}  # パス'/'が対象外
                              ]
             }
             }
