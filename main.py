@@ -146,6 +146,7 @@ def get_de(request):  # 目標ハニーポット・ポート数調査
     global day2
     global flag1
     global flag2
+    print('test3')
     ip = request.source_ip
     log = ['test']
     deip = []  # 目標ハニーポットのリスト
@@ -266,6 +267,7 @@ def get_group():  # 2-1-a～2-1-dから同じパス使用のipがグループに
     global path_list
     global path_ip
     global path_pattern
+    print('test3')
     ip_n = 0
     judge = []
     for ip_s in path_ip:
@@ -375,6 +377,7 @@ if __name__ == "__main__":
         ip_list = []
         count = 0  # パス種類数カウント
         output_list = []
+        print('test2')
         a = get_path(badip)  # Ipのパス種類数調査
         if count == 1:  # パス一種類だけ
             badip_list.remove(badip)
