@@ -121,7 +121,6 @@ def get_pattern3():  # 単発リクエストのIp抽出
         if len(result["hits"]["hits"]) == 1:
             iplist.append(ip)
             badip_list.remove(ip)
-    print(iplist)
     return iplist
 
 
@@ -152,6 +151,7 @@ def get_path(ip):  # パス種類数調査
             a.path.append(m[0]["_source"]["url"])
             query['query']['bool']['must_not'].append({'match_phrase': {'url': m[0]["_source"]["url"]}})
             count = count + 1
+    print(count)
     return a
 
 
@@ -229,7 +229,8 @@ def group_analysis1(request):  # パターン分類関数1
     flag1 = 0
     flag2 = 0
     get_de(request)  # 目標ハニーポット・ポート数調査
-    print(request+" "+flag1+" "+flag2)
+    print(request.source_ip)
+    print(flag1)
     # パターン分類
     if flag1 == 1 and flag2 == 1:
         output.pattern1_1_a.append(request.source_ip)
@@ -256,7 +257,7 @@ def group_analysis2(request):  # 複数パスの場合，同じパス使用のip
     flag1 = 0
     flag2 = 0
     get_de(request)  # 目標ハニーポット・ポート数調査
-    print(request )
+    print(request.source_ip)
     if flag1 == 1 and flag2 == 1:
         output.pattern2_1_a.append(request.source_ip)
     elif flag1 == 1 and flag2 == 2:
@@ -364,6 +365,7 @@ if __name__ == "__main__":
         count = 0  # パス種類数カウント
         output_list = []
         a = get_path(badip)  # Ipのパス種類数調査
+        print(count)
         if count == 1:  # パス一種類だけ
             badip_list.remove(badip)
             group_analysis1(a)
