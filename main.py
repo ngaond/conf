@@ -50,37 +50,37 @@ def get_badip():  # 攻撃（悪意フラグ）ip抽出
         {'bool': {
             'should': [
                 {'bool': {
-                    'must': [{'regexp': {'url': '.*wget.*'}},
+                    'must': [{'regexp': {'request.keyword': '.*wget.*'}},
                              {'match': {'@timestamp': day2}}]}},
                 {'bool': {
-                    'must': [{'regexp': {'url': '.*curl.*'}},
+                    'must': [{'regexp': {'request.keyword': '.*curl.*'}},
                              {'match': {'@timestamp': day2}}]}},
                 {'bool': {
-                    'must': [{'regexp': {'url': '.*fetch.*'}},
+                    'must': [{'regexp': {'request.keyword': '.*fetch.*'}},
                              {'match': {'@timestamp': day2}}]}},
                 {'bool': {
-                    'must': [{'regexp': {'url': '.*java.net.URL.*'}},
+                    'must': [{'regexp': {'request.keyword': '.*java.net.URL.*'}},
                              {'match': {'@timestamp': day2}}]}},
                 {'bool': {
-                    'must': [{'regexp': {'url': '.*bitsadmin.*'}},
+                    'must': [{'regexp': {'request.keyword': '.*bitsadmin.*'}},
                              {'match': {'@timestamp': day2}}]}},
                 {'bool': {
-                    'must': [{'regexp': {'url': '.*explorer.*'}},
+                    'must': [{'regexp': {'request.keyword': '.*explorer.*'}},
                              {'match': {'@timestamp': day2}}]}},
                 {'bool': {
-                    'must': [{'regexp': {'url': '.*certutil.*'}},
+                    'must': [{'regexp': {'request.keyword': '.*certutil.*'}},
                              {'match': {'@timestamp': day2}}]}},
                 {'bool': {
-                    'must': [{'regexp': {'url': '.*Wscript.*'}},
+                    'must': [{'regexp': {'request.keyword': '.*Wscript.*'}},
                              {'match': {'@timestamp': day2}}]}},
                 {'bool': {
-                    'must': [{'regexp': {'url': '.*lwp-download.*'}},
+                    'must': [{'regexp': {'request.keyword': '.*lwp-download.*'}},
                              {'match': {'@timestamp': day2}}]}},
                 {'bool': {
-                    'must': [{'regexp': {'url': '.*HTTP.start.*'}},
+                    'must': [{'regexp': {'request.keyword': '.*HTTP.start.*'}},
                              {'match': {'@timestamp': day2}}]}},
                 {'bool': {
-                    'must': [{'regexp': {'url': '.*getstore.*'}},
+                    'must': [{'regexp': {'request.keyword': '.*getstore.*'}},
                              {'match': {'@timestamp': day2}}]}},
                 {'bool': {
                     'must': [{'regexp': {'request.keyword': '.*mshta.*'}},
