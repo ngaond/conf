@@ -122,13 +122,12 @@ def get_path(ip):  # パス種類数調査
                 'must': [
                     {'term': {'@timestamp': day2}}, {'term': {'source_ip': ip}}],
                 'must_not': [
-                    {'match_phrase': {'source_ip': '0.0.0.0'}}
-                             #{'match_phrase': {'request': 'HEAD / HTTP/1.0'}},
-                             #{'match_phrase': {'request': 'HEAD / HTTP/1.1'}},
-                             #{'match_phrase': {'request': 'POST / HTTP/1.0'}},
-                             #{'match_phrase': {'request': 'POST / HTTP/1.1'}},
-                             #{'match_phrase': {'request': 'GET / HTTP/1.0'}},
-                             #{'match_phrase': {'request': 'GET / HTTP/1.1'}}
+                    {'match_phrase': {'request': 'HEAD / HTTP/1.0'}},
+                    {'match_phrase': {'request': 'HEAD / HTTP/1.1'}},
+                    {'match_phrase': {'request': 'POST / HTTP/1.0'}},
+                    {'match_phrase': {'request': 'POST / HTTP/1.1'}},
+                    {'match_phrase': {'request': 'GET / HTTP/1.0'}},
+                    {'match_phrase': {'request': 'GET / HTTP/1.1'}}
                     ]
             }}
     }
@@ -382,7 +381,9 @@ if __name__ == "__main__":
             badip_list.remove(badip)
             group_analysis1(a)
         elif count == 0:
-            print('data error')
+            output.pattern1_1_a.append(badip)
+            badip_list.remove(badip)
+            print("'/'から攻撃がある")
         else:  # 複数パス
             a.path.sort()
             group_analysis2(a)
