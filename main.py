@@ -53,46 +53,47 @@ def get_badip():  # 攻撃（悪意フラグ）ip抽出
                     'must': [{'regexp': {'request.keyword': '.*wget.*'}},
                              {'term': {'@timestamp': day2}}]}},
                 {'bool': {
-                    'must': [{'regexp': {'request.keyword': '.*curl.*http.*'}},
+                    'must': [{'regexp': {'request.keyword': '.*curl.*'}},
                              {'term': {'@timestamp': day2}}]}},
                 {'bool': {
-                    'must': [{'regexp': {'request.keyword': '.*fetch.*http.*'}},
+                    'must': [{'regexp': {'request.keyword': '.*fetch.*'}},
                              {'term': {'@timestamp': day2}}]}},
                 {'bool': {
-                    'must': [{'regexp': {'request.keyword': '.*java.net.URL.*http.*'}},
+                    'must': [{'regexp': {'request.keyword': '.*java.net.URL.*'}},
                              {'term': {'@timestamp': day2}}]}},
                 {'bool': {
-                    'must': [{'regexp': {'request.keyword': '.*bitsadmin.*http.*'}},
+                    'must': [{'regexp': {'request.keyword': '.*bitsadmin.*'}},
                              {'term': {'@timestamp': day2}}]}},
                 {'bool': {
-                    'must': [{'regexp': {'request.keyword': '.*explorer.*http.*'}},
+                    'must': [{'regexp': {'request.keyword': '.*explorer.*'}},
                              {'term': {'@timestamp': day2}}]}},
                 {'bool': {
-                    'must': [{'regexp': {'request.keyword': '.*certutil.*http.*'}},
+                    'must': [{'regexp': {'request.keyword': '.*certutil.*'}},
                              {'term': {'@timestamp': day2}}]}},
                 {'bool': {
-                    'must': [{'regexp': {'request.keyword': '.*Wscript.*http.*'}},
+                    'must': [{'regexp': {'request.keyword': '.*Wscript.*'}},
                              {'term': {'@timestamp': day2}}]}},
                 {'bool': {
-                    'must': [{'regexp': {'request.keyword': '.*lwp-download.*http.*'}},
+                    'must': [{'regexp': {'request.keyword': '.*lwp-download.*'}},
                              {'term': {'@timestamp': day2}}]}},
                 {'bool': {
-                    'must': [{'regexp': {'request.keyword': '.*HTTP.start.*http.*'}},
+                    'must': [{'regexp': {'request.keyword': '.*HTTP.start.*'}},
                              {'term': {'@timestamp': day2}}]}},
                 {'bool': {
-                    'must': [{'regexp': {'request.keyword': '.*getstore.*http.*'}},
+                    'must': [{'regexp': {'request.keyword': '.*getstore.*'}},
                              {'term': {'@timestamp': day2}}]}},
                 {'bool': {
-                    'must': [{'regexp': {'request.keyword': '.*mshta.*http.*'}},
+                    'must': [{'regexp': {'request.keyword': '.*mshta.*'}},
                              {'term': {'@timestamp': day2}}]}},
                 {'bool': {
-                    'must': [{'regexp': {'request.keyword': '.*objXMLHTTP.*http.*'}},
+                    'must': [{'regexp': {'request.keyword': '.*objXMLHTTP.*'}},
                              {'term': {'@timestamp': day2}}]}},
                 {'bool': {
-                    'must': [{'regexp': {'request.keyword': '.*urlopen.*http.*http.*'}},
+                    'must': [{'regexp': {'request.keyword': '.*urlopen.*'}},
                              {'term': {'@timestamp': day2}}]}}],
             'must_not': [
-                {'match_phrase': {'source_ip': '0.0.0.0'}}
+                {'match_phrase': {'request': 'User-Agent: wget'}},
+                {'match_phrase': {'request': 'User-Agent: curl'}}
             ]}}}
     while len(log) != 0:
         result = es.search(index=day1, body=query, size=1)
