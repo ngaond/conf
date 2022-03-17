@@ -45,7 +45,7 @@ def get_badip():  # 攻撃（悪意フラグ）ip抽出
     global badip_list
     global day1
     global day2
-    log = 'TEST'
+    log = ['TEST']
     query = {'query':
         {'bool': {
             'should': [
@@ -100,7 +100,7 @@ def get_badip():  # 攻撃（悪意フラグ）ip抽出
         if len(log) != 0:
             query['query']['bool']['must_not'].append({'match_phrase': {'source_ip': log[0]["_source"]["source_ip"]}})
             badip_list.append(log[0]["_source"]["source_ip"])
-    print('攻撃活動のip数')
+    print('攻撃活動のip数:')
     print(len(badip_list))
 
 
@@ -121,6 +121,7 @@ def get_pattern3():  # 単発リクエストのIp抽出
         if len(result["hits"]["hits"]) == 1:
             iplist.append(ip)
             badip_list.remove(ip)
+    print(iplist)
     return iplist
 
 
@@ -228,6 +229,7 @@ def group_analysis1(request):  # パターン分類関数1
     flag1 = 0
     flag2 = 0
     get_de(request)  # 目標ハニーポット・ポート数調査
+    print(request+""+flag1+""+flag2)
     # パターン分類
     if flag1 == 1 and flag2 == 1:
         output.pattern1_1_a.append(request.source_ip)
@@ -254,6 +256,7 @@ def group_analysis2(request):  # 複数パスの場合，同じパス使用のip
     flag1 = 0
     flag2 = 0
     get_de(request)  # 目標ハニーポット・ポート数調査
+    print(request )
     if flag1 == 1 and flag2 == 1:
         output.pattern2_1_a.append(request.source_ip)
     elif flag1 == 1 and flag2 == 2:
@@ -287,7 +290,9 @@ def get_group():  # 2-1-a～2-1-dから同じパス使用のipがグループに
                     ip_m = ip_m + 1
                 else:
                     ip_m = ip_m + 1
-        if len(listip) != 0:
+            else:
+                ip_m = ip_m + 1
+        if len(group_ip) != 0:
             output.pattern2_2.append(group_ip)
             output.pattern2_2_count = output.pattern2_2_count + len(group_ip)
         ip_n = ip_n + 1
@@ -295,25 +300,25 @@ def get_group():  # 2-1-a～2-1-dから同じパス使用のipがグループに
 
 def pattern_result():
     global output
-    print('パターン1-1-aのip数')
+    print('パターン1-1-aのip数:')
     print(len(output.pattern1_1_a))
-    print('パターン1-1-bのip数')
+    print('パターン1-1-bのip数:')
     print(len(output.pattern1_1_b))
-    print('パターン1-1-cのip数')
+    print('パターン1-1-cのip数:')
     print(len(output.pattern1_1_c))
-    print('パターン1-1-dのip数')
+    print('パターン1-1-dのip数:')
     print(len(output.pattern1_1_d))
-    print('パターン2-1-aのip数')
+    print('パターン2-1-aのip数:')
     print(len(output.pattern2_1_a))
-    print('パターン2-1-bのip数')
+    print('パターン2-1-bのip数:')
     print(len(output.pattern2_1_b))
-    print('パターン2-1-cのip数')
+    print('パターン2-1-cのip数:')
     print(len(output.pattern2_1_c))
-    print('パターン2-1-dのip数')
+    print('パターン2-1-dのip数:')
     print(len(output.pattern2_1_d))
-    print('パターン2-2のip数')
+    print('パターン2-2のip数:')
     print(len(output.pattern2_2_count))
-    print('パターン3のip数')
+    print('パターン3のip数:')
     print(len(output.pattern3))
     # 一部のパラメータを変更することで、特定のipまたは特定のpathを出力できる。
 
