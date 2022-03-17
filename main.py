@@ -138,7 +138,7 @@ def get_path(ip):  # パス種類数調査
             {'bool': {
                 'must': [
                     {'term': {'@timestamp': day2}}, {'term': {'source_ip': ip}}],
-                'must_not': [{'match_phrase': {'url': '/'}}  # パス'/'が対象外
+                'must_not': [{'match_phrase': {'source_ip': '0.0.0.0'}}
                              ]
             }}
     }
@@ -166,7 +166,7 @@ def get_de(request):  # 目標ハニーポット・ポート数調査
             {'bool': {
                 'must': [
                     {'term': {'@timestamp': day2}}, {'term': {'source_ip': ip}}],
-                'must_not': [{'match_phrase': {'url': '/'}}  # パス'/'が対象外
+                'must_not': [{'match_phrase': {'source_ip': '0.0.0.0'}}
                              ]
             }
             }
@@ -193,7 +193,7 @@ def get_de(request):  # 目標ハニーポット・ポート数調査
             {'bool': {
                 'must': [
                     {'term': {'@timestamp': day2}}, {'term': {'source_ip': ip}}],
-                'must_not': [{'match_phrase': {'url': '/'}}  # パス'/'が対象外
+                'must_not': [{'match_phrase': {'source_ip': '0.0.0.0'}}
                              ]
             }
             }
@@ -274,7 +274,7 @@ def get_group():  # 2-1-a～2-1-dから同じパス使用のipがグループに
         group_ip = [ip]
         while ip_m < len(path_ip):
             if ip_m != ip_n:
-                if operator.eq(path, path_1):
+                if operator.eq(path, path_list[ip_m]):
                     group_ip.append(path_ip[ip_m])
                     output.pattern2_1_a.remove(ip)
                     output.pattern2_1_a.remove(path_ip[ip_m])
