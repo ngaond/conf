@@ -143,7 +143,7 @@ def path_cut(url):
         index_x = surl.find('fetch')
         if index_x < index:
             index = index_x
-    if index > 0:
+    if index > 1:
         url = surl[0:index - 1]
     return url
 
@@ -153,7 +153,6 @@ def get_path(ip):  # パス種類数調査
     global count
     global day1
     global day2
-    count = 1
     m = ['test']
     a = Requests()
     a.source_ip = ip
@@ -175,13 +174,11 @@ def get_path(ip):  # パス種類数調査
         result = es.search(index=day1, body=query, size=1)
         m = result["hits"]["hits"]
         if len(m) != 0:
-            a.path.append(m[0]["_source"]["url"])
-            query['query']['bool']['must_not'].append({'term': {'url.keyword': path_cut(m[0]["_source"]["url"])}})
+            url=path_cut(m[0]["_source"]["url"])
+            a.path.append(url)
+            query['query']['bool']['must_not'].append({'match_phrase': {'url': url}})
             count = count + 1
             print(m[0]["_source"]["url"])
-    print(a.path)
-    print(count)
-    input()
     return a
 
 
