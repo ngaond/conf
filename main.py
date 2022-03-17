@@ -50,46 +50,46 @@ def get_badip():  # 攻撃（悪意フラグ）ip抽出
         {'bool': {
             'should': [
                 {'bool': {
-                    'must': [{'regexp': {'request.keyword': 'wget.+https?://[\w/:\.\-]+'}},
+                    'must': [{'regexp': {'url': '.*wget.*'}},
                              {'match': {'@timestamp': day2}}]}},
                 {'bool': {
-                    'must': [{'regexp': {'request.keyword': 'curl.+https?://[\w/:\.\-]+'}},
+                    'must': [{'regexp': {'url': '.*curl.*'}},
                              {'match': {'@timestamp': day2}}]}},
                 {'bool': {
-                    'must': [{'regexp': {'request.keyword': 'fetch.+https?://[\w/:\.\-]+'}},
+                    'must': [{'regexp': {'url': '.*fetch.*'}},
                              {'match': {'@timestamp': day2}}]}},
                 {'bool': {
-                    'must': [{'regexp': {'request.keyword': 'java.net.URL.+https?://[\w/:\.\-]+'}},
+                    'must': [{'regexp': {'url': '.*java.net.URL.*'}},
                              {'match': {'@timestamp': day2}}]}},
                 {'bool': {
-                    'must': [{'regexp': {'request.keyword': '.*bitsadmin.*http.*:[0-9].*'}},
+                    'must': [{'regexp': {'url': '.*bitsadmin.*'}},
                              {'match': {'@timestamp': day2}}]}},
                 {'bool': {
-                    'must': [{'regexp': {'request.keyword': '.*explorer.*http.*:[0-9].*'}},
+                    'must': [{'regexp': {'url': '.*explorer.*'}},
                              {'match': {'@timestamp': day2}}]}},
                 {'bool': {
-                    'must': [{'regexp': {'request.keyword': '.*certutil.*http.*:[0-9].*'}},
+                    'must': [{'regexp': {'url': '.*certutil.*'}},
                              {'match': {'@timestamp': day2}}]}},
                 {'bool': {
-                    'must': [{'regexp': {'request.keyword': '.*Wscript.*http.*:[0-9].*'}},
+                    'must': [{'regexp': {'url': '.*Wscript.*'}},
                              {'match': {'@timestamp': day2}}]}},
                 {'bool': {
-                    'must': [{'regexp': {'request.keyword': '.*lwp-download.*http.*:[0-9].*'}},
+                    'must': [{'regexp': {'url': '.*lwp-download.*'}},
                              {'match': {'@timestamp': day2}}]}},
                 {'bool': {
-                    'must': [{'regexp': {'request.keyword': '.*HTTP.start.*http.*:[0-9].*'}},
+                    'must': [{'regexp': {'url': '.*HTTP.start.*'}},
                              {'match': {'@timestamp': day2}}]}},
                 {'bool': {
-                    'must': [{'regexp': {'request.keyword': '.*getstore.*http.*:[0-9].*'}},
+                    'must': [{'regexp': {'url': '.*getstore.*'}},
                              {'match': {'@timestamp': day2}}]}},
                 {'bool': {
-                    'must': [{'regexp': {'request.keyword': '.*mshta.*http.*:[0-9].*'}},
+                    'must': [{'regexp': {'request.keyword': '.*mshta.*'}},
                              {'match': {'@timestamp': day2}}]}},
                 {'bool': {
-                    'must': [{'regexp': {'request.keyword': '.*objXMLHTTP.*http.*:[0-9].*'}},
+                    'must': [{'regexp': {'request.keyword': '.*objXMLHTTP.*'}},
                              {'match': {'@timestamp': day2}}]}},
                 {'bool': {
-                    'must': [{'regexp': {'request.keyword': '.*urlopen.*http.*:[0-9].*'}},
+                    'must': [{'regexp': {'request.keyword': '.*urlopen.*'}},
                              {'match': {'@timestamp': day2}}]}}],
             'must_not': [
                 {'match_phrase': {'source_ip': '0.0.0.0'}}
