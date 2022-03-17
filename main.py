@@ -164,6 +164,7 @@ def get_de(request):  # 目標ハニーポット・ポート数調査
     global flag2
     ip = request.source_ip
     log = ['test']
+    deip = []  # 目標ハニーポットのリスト
     query = {
         'query':
             {'bool': {
@@ -175,7 +176,6 @@ def get_de(request):  # 目標ハニーポット・ポート数調査
             }
     }
     while len(log) != 0:  # 目標ハニーポット数
-        deip = []  # 目標ハニーポットのリスト
         result = es.search(index=day1, body=query, size=1)
         log = result["hits"]["hits"]
         if len(log) != 0:
@@ -202,8 +202,8 @@ def get_de(request):  # 目標ハニーポット・ポート数調査
             }
     }
     log = ['test']
+    deport = []  # 目標ポートのリスト
     while len(log) != 0:  # 目標ポート数
-        deport = []  # 目標ポートのリスト
         result = es.search(index=day1, body=query, size=1)
         log = result["hits"]["hits"]
         if len(log) != 0:
@@ -273,6 +273,9 @@ def group_analysis2(request):  # 複数パスの場合，同じパス使用のip
 
 def get_group():  # 2-1-a～2-1-dから同じパス使用のipがグループになって，2-2に変更
     global output
+    global path_list
+    global path_ip
+    global path_pattern
     ip_n = 0
     while len(path_ip) > ip_n:
         path = path_list[ip_n]
