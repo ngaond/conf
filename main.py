@@ -147,8 +147,8 @@ def get_path(ip):  # パス種類数調査
         result = es.search(index=day1, body=query, size=1)
         m = result["hits"]["hits"]
         if len(m) != 0:
-            print(result["hits"]["hits"][0]["_source"]["source_ip"])
-            print(result["hits"]["hits"][0]["_source"]["url"])
+            #(result["hits"]["hits"][0]["_source"]["source_ip"])
+            #print(result["hits"]["hits"][0]["_source"]["url"])
             a.path.append(m[0]["_source"]["url"])
             query['query']['bool']['must_not'].append({'match_phrase': {'url': m[0]["_source"]["url"]}})
             count = count + 1
@@ -229,7 +229,7 @@ def group_analysis1(request):  # パターン分類関数1
     flag1 = 0
     flag2 = 0
     get_de(request)  # 目標ハニーポット・ポート数調査
-    print(request+""+flag1+""+flag2)
+    print(request+" "+flag1+" "+flag2)
     # パターン分類
     if flag1 == 1 and flag2 == 1:
         output.pattern1_1_a.append(request.source_ip)
@@ -317,7 +317,7 @@ def pattern_result():
     print('パターン2-1-dのip数:')
     print(len(output.pattern2_1_d))
     print('パターン2-2のip数:')
-    print(len(output.pattern2_2_count))
+    print(output.pattern2_2_count)
     print('パターン3のip数:')
     print(len(output.pattern3))
     # 一部のパラメータを変更することで、特定のipまたは特定のpathを出力できる。
