@@ -261,12 +261,16 @@ def group_analysis2(request):  # 複数パスの場合，同じパス使用のip
     get_de(request)  # 目標ハニーポット・ポート数調査
     if flag1 == 1 and flag2 == 1:
         output.pattern2_1_a.append(request.source_ip)
+        path_pattern.append('1')
     elif flag1 == 1 and flag2 == 2:
         output.pattern2_1_b.append(request.source_ip)
+        path_pattern.append('2')
     elif flag1 == 2 and flag2 == 1:
         output.pattern2_1_c.append(request.source_ip)
+        path_pattern.append('3')
     elif flag1 == 2 and flag2 == 2:
         output.pattern2_1_d.append(request.source_ip)
+        path_pattern.append('4')
 
 
 def get_group():  # 2-1-a～2-1-dから同じパス使用のipがグループになって，2-2に変更
@@ -281,14 +285,22 @@ def get_group():  # 2-1-a～2-1-dから同じパス使用のipがグループに
             if ip_m != ip_n:
                 if operator.eq(path, path_list[ip_m]):
                     group_ip.append(path_ip[ip_m])
-                    output.pattern2_1_a.remove(ip)
-                    output.pattern2_1_a.remove(path_ip[ip_m])
-                    output.pattern2_1_b.remove(ip)
-                    output.pattern2_1_b.remove(path_ip[ip_m])
-                    output.pattern2_1_c.remove(ip)
-                    output.pattern2_1_c.remove(path_ip[ip_m])
-                    output.pattern2_1_d.remove(ip)
-                    output.pattern2_1_d.remove(path_ip[ip_m])
+                    if path_pattern[ip_n] == 1:
+                        output.pattern2_1_a.remove(ip)
+                    elif path_pattern[ip_n] == 2:
+                        output.pattern2_1_b.remove(ip)
+                    elif path_pattern[ip_n] == 3:
+                        output.pattern2_1_c.remove(ip)
+                    elif path_pattern[ip_n] == 4:
+                        output.pattern2_1_d.remove(ip)
+                    if path_pattern[ip_m] == 1:
+                        output.pattern2_1_a.remove(path_ip[ip_m])
+                    elif path_pattern[ip_m] == 2:
+                        output.pattern2_1_b.remove(path_ip[ip_m])
+                    elif path_pattern[ip_m] == 3:
+                        output.pattern2_1_c.remove(path_ip[ip_m])
+                    elif path_pattern[ip_m] == 4:
+                        output.pattern2_1_d.remove(path_ip[ip_m])
                     ip_m = ip_m + 1
                 else:
                     ip_m = ip_m + 1
