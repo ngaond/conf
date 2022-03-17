@@ -138,12 +138,12 @@ def get_path(ip):  # パス種類数調査
             {'bool': {
                 'must': [
                     {'term': {'@timestamp': day2}}, {'term': {'source_ip': ip}}],
-                'must_not': [{'match_phrase': {'request.keyword': 'HEAD / HTTP/1.0'}},
-                             {'match_phrase': {'request.keyword': 'HEAD / HTTP/1.1'}},
-                             {'match_phrase': {'request.keyword': 'POST / HTTP/1.0'}},
-                             {'match_phrase': {'request.keyword': 'POST / HTTP/1.1'}},
-                             {'match_phrase': {'request.keyword': 'GET / HTTP/1.0'}},
-                             {'match_phrase': {'request.keyword': 'GET / HTTP/1.1'}}
+                'must_not': [{'match_phrase': {'request': 'HEAD / HTTP/1.0'}},
+                             {'match_phrase': {'request': 'HEAD / HTTP/1.1'}},
+                             {'match_phrase': {'request': 'POST / HTTP/1.0'}},
+                             {'match_phrase': {'request': 'POST / HTTP/1.1'}},
+                             {'match_phrase': {'request': 'GET / HTTP/1.0'}},
+                             {'match_phrase': {'request': 'GET / HTTP/1.1'}}
                              ]
             }}
     }
@@ -281,7 +281,7 @@ def get_group():  # 2-1-a～2-1-dから同じパス使用のipがグループに
         ip = path_ip[ip_n]
         ip_m = 0
         group_ip = [ip]
-        while ip_m < len(path_ip):
+        while ip_m < len(path_ip):  # 複数ipが同じ複数パスの場合，2-1-xから2-2に変更
             if ip_m != ip_n:
                 if operator.eq(path, path_list[ip_m]):
                     group_ip.append(path_ip[ip_m])
