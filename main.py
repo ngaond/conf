@@ -151,8 +151,6 @@ def get_path(ip):  # パス種類数調査
         result = es.search(index=day1, body=query, size=1)
         m = result["hits"]["hits"]
         if len(m) != 0:
-            print(result["hits"]["hits"][0]["_source"]["source_ip"])
-            print(result["hits"]["hits"][0]["_source"]["request"])
             a.path.append(m[0]["_source"]["url"])
             query['query']['bool']['must_not'].append({'match_phrase': {'url': m[0]["_source"]["url"]}})
             count = count + 1
@@ -285,21 +283,21 @@ def get_group():  # 2-1-a～2-1-dから同じパス使用のipがグループに
             if ip_m != ip_n:
                 if operator.eq(path, path_list[ip_m]):
                     group_ip.append(path_ip[ip_m])
-                    if path_pattern[ip_n] == 1:
+                    if path_pattern[ip_n] == '1':
                         output.pattern2_1_a.remove(ip)
-                    elif path_pattern[ip_n] == 2:
+                    elif path_pattern[ip_n] == '2':
                         output.pattern2_1_b.remove(ip)
-                    elif path_pattern[ip_n] == 3:
+                    elif path_pattern[ip_n] == '3':
                         output.pattern2_1_c.remove(ip)
-                    elif path_pattern[ip_n] == 4:
+                    elif path_pattern[ip_n] == '4':
                         output.pattern2_1_d.remove(ip)
-                    if path_pattern[ip_m] == 1:
+                    if path_pattern[ip_m] == '1':
                         output.pattern2_1_a.remove(path_ip[ip_m])
-                    elif path_pattern[ip_m] == 2:
+                    elif path_pattern[ip_m] == '2':
                         output.pattern2_1_b.remove(path_ip[ip_m])
-                    elif path_pattern[ip_m] == 3:
+                    elif path_pattern[ip_m] == '3':
                         output.pattern2_1_c.remove(path_ip[ip_m])
-                    elif path_pattern[ip_m] == 4:
+                    elif path_pattern[ip_m] == '4':
                         output.pattern2_1_d.remove(path_ip[ip_m])
                     ip_m = ip_m + 1
                 else:
