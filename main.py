@@ -277,6 +277,9 @@ def get_group():  # 2-1-a～2-1-dから同じパス使用のipがグループに
     global path_ip
     global path_pattern
     ip_n = 0
+    judge = []
+    for ip_s in path_ip:
+        judge.append(0)
     while len(path_ip) > ip_n:
         path = path_list[ip_n]
         ip = path_ip[ip_n]
@@ -285,23 +288,27 @@ def get_group():  # 2-1-a～2-1-dから同じパス使用のipがグループに
         while ip_m < len(path_ip):  # 複数ipが同じ複数パスの場合，2-1-xから2-2に変更
             if ip_m != ip_n:
                 if operator.eq(path, path_list[ip_m]):
-                    group_ip.append(path_ip[ip_m])
-                    if path_pattern[ip_n] == '1':
-                        output.pattern2_1_a.remove(ip)
-                    elif path_pattern[ip_n] == '2':
-                        output.pattern2_1_b.remove(ip)
-                    elif path_pattern[ip_n] == '3':
-                        output.pattern2_1_c.remove(ip)
-                    elif path_pattern[ip_n] == '4':
-                        output.pattern2_1_d.remove(ip)
-                    if path_pattern[ip_m] == '1':
-                        output.pattern2_1_a.remove(path_ip[ip_m])
-                    elif path_pattern[ip_m] == '2':
-                        output.pattern2_1_b.remove(path_ip[ip_m])
-                    elif path_pattern[ip_m] == '3':
-                        output.pattern2_1_c.remove(path_ip[ip_m])
-                    elif path_pattern[ip_m] == '4':
-                        output.pattern2_1_d.remove(path_ip[ip_m])
+                    if judge[ip_n] == 0:
+                        if path_pattern[ip_n] == '1':
+                            output.pattern2_1_a.remove(ip)
+                        elif path_pattern[ip_n] == '2':
+                            output.pattern2_1_b.remove(ip)
+                        elif path_pattern[ip_n] == '3':
+                            output.pattern2_1_c.remove(ip)
+                        elif path_pattern[ip_n] == '4':
+                            output.pattern2_1_d.remove(ip)
+                        judge[ip_n] = 1
+                    if judge[ip_m] == 0:
+                        group_ip.append(path_ip[ip_m])
+                        if path_pattern[ip_m] == '1':
+                            output.pattern2_1_a.remove(path_ip[ip_m])
+                        elif path_pattern[ip_m] == '2':
+                            output.pattern2_1_b.remove(path_ip[ip_m])
+                        elif path_pattern[ip_m] == '3':
+                            output.pattern2_1_c.remove(path_ip[ip_m])
+                        elif path_pattern[ip_m] == '4':
+                            output.pattern2_1_d.remove(path_ip[ip_m])
+                        judge[ip_m] = 1
                     ip_m = ip_m + 1
                 else:
                     ip_m = ip_m + 1
