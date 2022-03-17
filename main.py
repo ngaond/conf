@@ -50,16 +50,16 @@ def get_badip():  # 攻撃（悪意フラグ）ip抽出
         {'bool': {
             'should': [
                 {'bool': {
-                    'must': [{'regexp': {'request.keyword': '.*wget.*http.*:[0-9].*'}},
+                    'must': [{'regexp': {'request.keyword': 'wget.+https?://[\w/:\.\-]+'}},
                              {'match': {'@timestamp': day2}}]}},
                 {'bool': {
-                    'must': [{'regexp': {'request.keyword': '.*curl.*http.*:[0-9].*'}},
+                    'must': [{'regexp': {'request.keyword': 'curl.+https?://[\w/:\.\-]+'}},
                              {'match': {'@timestamp': day2}}]}},
                 {'bool': {
-                    'must': [{'regexp': {'request.keyword': '.*fetch.*http.*:[0-9].*'}},
+                    'must': [{'regexp': {'request.keyword': 'fetch.+https?://[\w/:\.\-]+'}},
                              {'match': {'@timestamp': day2}}]}},
                 {'bool': {
-                    'must': [{'regexp': {'request.keyword': '.*java.net.URL.*http.*:[0-9].*'}},
+                    'must': [{'regexp': {'request.keyword': 'java.net.URL.+https?://[\w/:\.\-]+'}},
                              {'match': {'@timestamp': day2}}]}},
                 {'bool': {
                     'must': [{'regexp': {'request.keyword': '.*bitsadmin.*http.*:[0-9].*'}},
@@ -146,12 +146,11 @@ def get_path(ip):  # パス種類数調査
         result = es.search(index=day1, body=query, size=1)
         m = result["hits"]["hits"]
         if len(m) != 0:
-            #(result["hits"]["hits"][0]["_source"]["source_ip"])
-            #print(result["hits"]["hits"][0]["_source"]["url"])
+            print(result["hits"]["hits"][0]["_source"]["source_ip"])
+            print(result["hits"]["hits"][0]["_source"]["request"])
             a.path.append(m[0]["_source"]["url"])
             query['query']['bool']['must_not'].append({'match_phrase': {'url': m[0]["_source"]["url"]}})
             count = count + 1
-    print(count)
     return a
 
 
@@ -229,8 +228,6 @@ def group_analysis1(request):  # パターン分類関数1
     flag1 = 0
     flag2 = 0
     get_de(request)  # 目標ハニーポット・ポート数調査
-    print(request.source_ip)
-    print(flag1)
     # パターン分類
     if flag1 == 1 and flag2 == 1:
         output.pattern1_1_a.append(request.source_ip)
@@ -257,7 +254,6 @@ def group_analysis2(request):  # 複数パスの場合，同じパス使用のip
     flag1 = 0
     flag2 = 0
     get_de(request)  # 目標ハニーポット・ポート数調査
-    print(request.source_ip)
     if flag1 == 1 and flag2 == 1:
         output.pattern2_1_a.append(request.source_ip)
     elif flag1 == 1 and flag2 == 2:
@@ -365,7 +361,6 @@ if __name__ == "__main__":
         count = 0  # パス種類数カウント
         output_list = []
         a = get_path(badip)  # Ipのパス種類数調査
-        print(count)
         if count == 1:  # パス一種類だけ
             badip_list.remove(badip)
             group_analysis1(a)
