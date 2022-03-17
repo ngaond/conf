@@ -50,46 +50,46 @@ def get_badip():  # 攻撃（悪意フラグ）ip抽出
         {'bool': {
             'should': [
                 {'bool': {
-                    'must': [{'regexp': {'request.keyword': '.*wget.*'}},
+                    'must': [{'regexp': {'url.keyword': '.*wget.*'}},
                              {'match': {'@timestamp': day2}}]}},
                 {'bool': {
-                    'must': [{'regexp': {'request.keyword': '.*curl.*'}},
+                    'must': [{'regexp': {'url.keyword': '.*curl.*'}},
                              {'match': {'@timestamp': day2}}]}},
                 {'bool': {
-                    'must': [{'regexp': {'request.keyword': '.*fetch.*'}},
+                    'must': [{'regexp': {'url.keyword': '.*fetch.*'}},
                              {'match': {'@timestamp': day2}}]}},
                 {'bool': {
-                    'must': [{'regexp': {'request.keyword': '.*java.net.URL.*'}},
+                    'must': [{'regexp': {'url.keyword': '.*java.net.URL.*'}},
                              {'match': {'@timestamp': day2}}]}},
                 {'bool': {
-                    'must': [{'regexp': {'request.keyword': '.*bitsadmin.*'}},
+                    'must': [{'regexp': {'url.keyword': '.*bitsadmin.*'}},
                              {'match': {'@timestamp': day2}}]}},
                 {'bool': {
-                    'must': [{'regexp': {'request.keyword': '.*explorer.*'}},
+                    'must': [{'regexp': {'url.keyword': '.*explorer.*'}},
                              {'match': {'@timestamp': day2}}]}},
                 {'bool': {
-                    'must': [{'regexp': {'request.keyword': '.*certutil.*'}},
+                    'must': [{'regexp': {'url.keyword': '.*certutil.*'}},
                              {'match': {'@timestamp': day2}}]}},
                 {'bool': {
-                    'must': [{'regexp': {'request.keyword': '.*Wscript.*'}},
+                    'must': [{'regexp': {'url.keyword': '.*Wscript.*'}},
                              {'match': {'@timestamp': day2}}]}},
                 {'bool': {
-                    'must': [{'regexp': {'request.keyword': '.*lwp-download.*'}},
+                    'must': [{'regexp': {'url.keyword': '.*lwp-download.*'}},
                              {'match': {'@timestamp': day2}}]}},
                 {'bool': {
-                    'must': [{'regexp': {'request.keyword': '.*HTTP.start.*'}},
+                    'must': [{'regexp': {'url.keyword': '.*HTTP.start.*'}},
                              {'match': {'@timestamp': day2}}]}},
                 {'bool': {
-                    'must': [{'regexp': {'request.keyword': '.*getstore.*'}},
+                    'must': [{'regexp': {'url.keyword': '.*getstore.*'}},
                              {'match': {'@timestamp': day2}}]}},
                 {'bool': {
-                    'must': [{'regexp': {'request.keyword': '.*mshta.*'}},
+                    'must': [{'regexp': {'url.keyword': '.*mshta.*'}},
                              {'match': {'@timestamp': day2}}]}},
                 {'bool': {
-                    'must': [{'regexp': {'request.keyword': '.*objXMLHTTP.*'}},
+                    'must': [{'regexp': {'url.keyword': '.*objXMLHTTP.*'}},
                              {'match': {'@timestamp': day2}}]}},
                 {'bool': {
-                    'must': [{'regexp': {'request.keyword': '.*urlopen.*'}},
+                    'must': [{'regexp': {'url.keyword': '.*urlopen.*'}},
                              {'match': {'@timestamp': day2}}]}}],
             'must_not': [
                 {'match_phrase': {'source_ip': '0.0.0.0'}}
@@ -138,7 +138,12 @@ def get_path(ip):  # パス種類数調査
             {'bool': {
                 'must': [
                     {'term': {'@timestamp': day2}}, {'term': {'source_ip': ip}}],
-                'must_not': [{'match_phrase': {'source_ip': '0.0.0.0'}}
+                'must_not': [{'match_phrase': {'request.keyword': 'HEAD / HTTP/1.0'}},
+                             {'match_phrase': {'request.keyword': 'HEAD / HTTP/1.1'}},
+                             {'match_phrase': {'request.keyword': 'POST / HTTP/1.0'}},
+                             {'match_phrase': {'request.keyword': 'POST / HTTP/1.1'}},
+                             {'match_phrase': {'request.keyword': 'GET / HTTP/1.0'}},
+                             {'match_phrase': {'request.keyword': 'GET / HTTP/1.1'}}
                              ]
             }}
     }
