@@ -28,7 +28,7 @@ class Patterns(object):
         self.pattern2_2_count = 0
 
 
-def init_day():  # 日設定
+def init_day():  # 日時設定
     global day1
     global day2
     print('年入力')
@@ -50,47 +50,47 @@ def get_badip():  # 攻撃（悪意フラグ）ip抽出
         {'bool': {
             'should': [
                 {'bool': {
-                    'must': [{'regexp': {'url.keyword': '.*wget.*'}},
-                             {'match': {'@timestamp': day2}}]}},
+                    'must': [{'regexp': {'request': '.*wget.*http.*'}},
+                             {'term': {'@timestamp': day2}}]}},
                 {'bool': {
-                    'must': [{'regexp': {'url.keyword': '.*curl.*'}},
-                             {'match': {'@timestamp': day2}}]}},
+                    'must': [{'regexp': {'request': '.*curl.*http.*'}},
+                             {'term': {'@timestamp': day2}}]}},
                 {'bool': {
-                    'must': [{'regexp': {'url.keyword': '.*fetch.*'}},
-                             {'match': {'@timestamp': day2}}]}},
+                    'must': [{'regexp': {'request': '.*fetch.*http.*'}},
+                             {'term': {'@timestamp': day2}}]}},
                 {'bool': {
-                    'must': [{'regexp': {'url.keyword': '.*java.net.URL.*'}},
-                             {'match': {'@timestamp': day2}}]}},
+                    'must': [{'regexp': {'request': '.*java.net.URL.*http.*'}},
+                             {'term': {'@timestamp': day2}}]}},
                 {'bool': {
-                    'must': [{'regexp': {'url.keyword': '.*bitsadmin.*'}},
-                             {'match': {'@timestamp': day2}}]}},
+                    'must': [{'regexp': {'request': '.*bitsadmin.*http.*'}},
+                             {'term': {'@timestamp': day2}}]}},
                 {'bool': {
-                    'must': [{'regexp': {'url.keyword': '.*explorer.*'}},
-                             {'match': {'@timestamp': day2}}]}},
+                    'must': [{'regexp': {'request': '.*explorer.*http.*'}},
+                             {'term': {'@timestamp': day2}}]}},
                 {'bool': {
-                    'must': [{'regexp': {'url.keyword': '.*certutil.*'}},
-                             {'match': {'@timestamp': day2}}]}},
+                    'must': [{'regexp': {'request': '.*certutil.*http.*'}},
+                             {'term': {'@timestamp': day2}}]}},
                 {'bool': {
-                    'must': [{'regexp': {'url.keyword': '.*Wscript.*'}},
-                             {'match': {'@timestamp': day2}}]}},
+                    'must': [{'regexp': {'request': '.*Wscript.*http.*'}},
+                             {'term': {'@timestamp': day2}}]}},
                 {'bool': {
-                    'must': [{'regexp': {'url.keyword': '.*lwp-download.*'}},
-                             {'match': {'@timestamp': day2}}]}},
+                    'must': [{'regexp': {'request': '.*lwp-download.*http.*'}},
+                             {'term': {'@timestamp': day2}}]}},
                 {'bool': {
-                    'must': [{'regexp': {'url.keyword': '.*HTTP.start.*'}},
-                             {'match': {'@timestamp': day2}}]}},
+                    'must': [{'regexp': {'request': '.*HTTP.start.*http.*'}},
+                             {'term': {'@timestamp': day2}}]}},
                 {'bool': {
-                    'must': [{'regexp': {'url.keyword': '.*getstore.*'}},
-                             {'match': {'@timestamp': day2}}]}},
+                    'must': [{'regexp': {'request': '.*getstore.*http.*'}},
+                             {'term': {'@timestamp': day2}}]}},
                 {'bool': {
-                    'must': [{'regexp': {'url.keyword': '.*mshta.*'}},
-                             {'match': {'@timestamp': day2}}]}},
+                    'must': [{'regexp': {'request': '.*mshta.*http.*'}},
+                             {'term': {'@timestamp': day2}}]}},
                 {'bool': {
-                    'must': [{'regexp': {'url.keyword': '.*objXMLHTTP.*'}},
-                             {'match': {'@timestamp': day2}}]}},
+                    'must': [{'regexp': {'request': '.*objXMLHTTP.*http.*'}},
+                             {'term': {'@timestamp': day2}}]}},
                 {'bool': {
-                    'must': [{'regexp': {'url.keyword': '.*urlopen.*'}},
-                             {'match': {'@timestamp': day2}}]}}],
+                    'must': [{'regexp': {'request': '.*urlopen.*http.*'}},
+                             {'term': {'@timestamp': day2}}]}}],
             'must_not': [
                 {'match_phrase': {'source_ip': '0.0.0.0'}}
             ]}}}
@@ -124,7 +124,7 @@ def get_pattern3():  # 単発リクエストのIp抽出
     return iplist
 
 
-def path_cut(url):
+def path_cut(url): # urlからパス抽出
     index = 0
     index_x = 0
     surl = ''
@@ -144,7 +144,7 @@ def path_cut(url):
         if index_x < index:
             index = index_x
     if index > 1:
-        url = surl[0:index - 1]
+        url = surl[0:index]
     return url
 
 
