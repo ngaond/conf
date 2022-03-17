@@ -46,23 +46,22 @@ def get_badip():  # 攻撃（悪意フラグ）ip抽出
     global day1
     global day2
     log = ['TEST']
-    query = {'query':{
-              'bool': {
-                'must': [{'regexp': {'analysis_tags.keyword': '.*'}},
+    query = {'query':
+        {'bool': {
+            'must': [{'regexp': {'analysis_tags.keyword': '.*'}},
                      {'term': {'@timestamp': day2}}],
-                'must_not': [
+            'must_not': [
                 {'match_phrase': {'source_ip': '0.0.0.0'}}
             ]}}}
+
     while len(log) != 0:
         result = es.search(index=day1, body=query, size=1)
         log = result["hits"]["hits"]
         if len(log) != 0:
             query['query']['bool']['must_not'].append({'match_phrase': {'source_ip': log[0]["_source"]["source_ip"]}})
             badip_list.append(log[0]["_source"]["source_ip"])
-        print(log[0]["_source"]['analysis_tags'])
     print('攻撃活動のip数:')
     print(len(badip_list))
-    input()
 
 
 def get_pattern3():  # 単発リクエストのIp抽出
@@ -85,7 +84,7 @@ def get_pattern3():  # 単発リクエストのIp抽出
     return iplist
 
 
-def path_cut(url): # urlからパス抽出
+def path_cut(url):  # urlからパス抽出
     index = 0
     index_x = 0
     surl = ''
@@ -135,11 +134,10 @@ def get_path(ip):  # パス種類数調査
         result = es.search(index=day1, body=query, size=1)
         m = result["hits"]["hits"]
         if len(m) != 0:
-            url=path_cut(m[0]["_source"]["url"])
+            url = path_cut(m[0]["_source"]["url"])
             a.path.append(url)
             query['query']['bool']['must_not'].append({'match_phrase': {'url': url}})
             count = count + 1
-            print(m[0]["_source"]["url"])
     return a
 
 
@@ -172,10 +170,13 @@ def get_de(request):  # 目標ハニーポット・ポート数調査
                     {'match_phrase': {'destination_ip': log[0]["_source"]["destination_ip"]}})
             elif len(deip) == 1:
                 log = []
-                flag2 = 2
+                deip.append(log[0]["_source"]["destination_ip"])
+                # request.destination_ip.append(log[0]["_source"]["destination_ip"])
+                flag1 = 2
+                # 変更より全部の目標ハニーポット統計が可能になる
     if len(deip) == 1:
         flag1 = 1
-    elif len(deip) != 0:
+    elif len(deip) == 0:
         print('data error')
     query = {
         'query':
@@ -195,15 +196,18 @@ def get_de(request):  # 目標ハニーポット・ポート数調査
         if len(log) != 0:
             if len(deport) == 0:
                 deport.append(log[0]["_source"]["destination_port"])
-                request.destination_ip.append(log[0]["_source"]["destination_port"])
+                request.destination_port.append(log[0]["_source"]["destination_port"])
                 query['query']['bool']['must_not'].append(
                     {'match_phrase': {'destination_port': log[0]["_source"]["destination_port"]}})
             elif len(deport) == 1:
                 log = []
+                deport.append(log[0]["_source"]["destination_port"])
+                # request.destination_port.append(log[0]["_source"]["destination_port"])
                 flag2 = 2
+                # 変更より全部のポート統計が可能になる
     if len(deport) == 1:
         flag2 = 1
-    elif len(deport) != 0:
+    elif len(deport) == 0:
         print('data error')
 
 
@@ -381,5 +385,5 @@ if __name__ == "__main__":
             a.path.sort()
             group_analysis2(a)
             badip_list.remove(badip)
-    get_group()
+    get_group()  # 複数パスのグループ化
     pattern_result()  # 各パターンのip数
