@@ -121,13 +121,15 @@ def get_path(ip):  # パス種類数調査
             {'bool': {
                 'must': [
                     {'term': {'@timestamp': day2}}, {'term': {'source_ip': ip}}],
-                'must_not': [{'match_phrase': {'request': 'HEAD / HTTP/1.0'}},
-                             {'match_phrase': {'request': 'HEAD / HTTP/1.1'}},
-                             {'match_phrase': {'request': 'POST / HTTP/1.0'}},
-                             {'match_phrase': {'request': 'POST / HTTP/1.1'}},
-                             {'match_phrase': {'request': 'GET / HTTP/1.0'}},
-                             {'match_phrase': {'request': 'GET / HTTP/1.1'}}
-                             ]
+                'must_not': [
+                    {'match_phrase': {'source_ip': '0.0.0.0'}}
+                             #{'match_phrase': {'request': 'HEAD / HTTP/1.0'}},
+                             #{'match_phrase': {'request': 'HEAD / HTTP/1.1'}},
+                             #{'match_phrase': {'request': 'POST / HTTP/1.0'}},
+                             #{'match_phrase': {'request': 'POST / HTTP/1.1'}},
+                             #{'match_phrase': {'request': 'GET / HTTP/1.0'}},
+                             #{'match_phrase': {'request': 'GET / HTTP/1.1'}}
+                    ]
             }}
     }
     while len(m) != 0:
@@ -146,7 +148,6 @@ def get_de(request):  # 目標ハニーポット・ポート数調査
     global day2
     global flag1
     global flag2
-    print('test3')
     ip = request.source_ip
     log = ['test']
     deip = []  # 目標ハニーポットのリスト
@@ -170,10 +171,10 @@ def get_de(request):  # 目標ハニーポット・ポート数調査
                 query['query']['bool']['must_not'].append(
                     {'match_phrase': {'destination_ip': log[0]["_source"]["destination_ip"]}})
             elif len(deip) == 1:
-                log = []
                 deip.append(log[0]["_source"]["destination_ip"])
                 # request.destination_ip.append(log[0]["_source"]["destination_ip"])
                 flag1 = 2
+                log = []
                 # 変更より全部の目標ハニーポット統計が可能になる
     if len(deip) == 1:
         flag1 = 1
@@ -201,10 +202,10 @@ def get_de(request):  # 目標ハニーポット・ポート数調査
                 query['query']['bool']['must_not'].append(
                     {'match_phrase': {'destination_port': log[0]["_source"]["destination_port"]}})
             elif len(deport) == 1:
-                log = []
                 deport.append(log[0]["_source"]["destination_port"])
                 # request.destination_port.append(log[0]["_source"]["destination_port"])
                 flag2 = 2
+                log = []
                 # 変更より全部のポート統計が可能になる
     if len(deport) == 1:
         flag2 = 1
@@ -267,7 +268,6 @@ def get_group():  # 2-1-a～2-1-dから同じパス使用のipがグループに
     global path_list
     global path_ip
     global path_pattern
-    print('test3')
     ip_n = 0
     judge = []
     for ip_s in path_ip:
@@ -377,7 +377,6 @@ if __name__ == "__main__":
         ip_list = []
         count = 0  # パス種類数カウント
         output_list = []
-        print('test2')
         a = get_path(badip)  # Ipのパス種類数調査
         if count == 1:  # パス一種類だけ
             badip_list.remove(badip)
