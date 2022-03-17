@@ -138,12 +138,12 @@ def get_path(ip):  # パス種類数調査
             {'bool': {
                 'must': [
                     {'term': {'@timestamp': day2}}, {'term': {'source_ip': ip}}],
-                'must_not': [{'match_phrase': {'request': 'HEAD / HTTP/1.0'}},
-                             {'match_phrase': {'request': 'HEAD / HTTP/1.1'}},
-                             {'match_phrase': {'request': 'POST / HTTP/1.0'}},
-                             {'match_phrase': {'request': 'POST / HTTP/1.1'}},
-                             {'match_phrase': {'request': 'GET / HTTP/1.0'}},
-                             {'match_phrase': {'request': 'GET / HTTP/1.1'}}
+                'must_not': [{'term': {'request': 'HEAD / HTTP/1.0'}},
+                             {'term': {'request': 'HEAD / HTTP/1.1'}},
+                             {'term': {'request': 'POST / HTTP/1.0'}},
+                             {'term': {'request': 'POST / HTTP/1.1'}},
+                             {'term': {'request': 'GET / HTTP/1.0'}},
+                             {'term': {'request': 'GET / HTTP/1.1'}}
                              ]
             }}
     }
@@ -152,8 +152,11 @@ def get_path(ip):  # パス種類数調査
         m = result["hits"]["hits"]
         if len(m) != 0:
             a.path.append(m[0]["_source"]["url"])
-            query['query']['bool']['must_not'].append({'match_phrase': {'url': m[0]["_source"]["url"]}})
+            query['query']['bool']['must_not'].append({'term': {'request': m[0]["_source"]["url"]}})
             count = count + 1
+    print(a.path)
+    print(count)
+    input()
     return a
 
 
