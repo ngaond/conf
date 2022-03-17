@@ -124,6 +124,30 @@ def get_pattern3():  # 単発リクエストのIp抽出
     return iplist
 
 
+def path_cut(url):
+    index = 0
+    index_x = 0
+    surl = ''
+    surl = url
+    if '?' in surl:
+        index = surl.find('?')
+    if 'wget' in surl:
+        index_x = surl.find('wget')
+        if index_x < index:
+            index = index_x
+    if 'curl' in surl:
+        index_x = surl.find('curl')
+        if index_x < index:
+            index = index_x
+    if 'fetch' in surl:
+        index_x = surl.find('fetch')
+        if index_x < index:
+            index = index_x
+    if index > 0:
+        url = surl[0:index - 1]
+    return url
+
+
 def get_path(ip):  # パス種類数調査
     global badip_list
     global count
@@ -152,8 +176,9 @@ def get_path(ip):  # パス種類数調査
         m = result["hits"]["hits"]
         if len(m) != 0:
             a.path.append(m[0]["_source"]["url"])
-            query['query']['bool']['must_not'].append({'term': {'url.keyword': m[0]["_source"]["url"]}})
+            query['query']['bool']['must_not'].append({'term': {'url.keyword': path_cut(m[0]["_source"]["url"])}})
             count = count + 1
+            print(m[0]["_source"]["url"])
     print(a.path)
     print(count)
     input()
