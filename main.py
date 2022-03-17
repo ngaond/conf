@@ -46,54 +46,11 @@ def get_badip():  # 攻撃（悪意フラグ）ip抽出
     global day1
     global day2
     log = ['TEST']
-    query = {'query':
-        {'bool': {
-            'should': [
-                {'bool': {
-                    'must': [{'regexp': {'request.keyword': '.*wget.*'}},
-                             {'term': {'@timestamp': day2}}]}},
-                {'bool': {
-                    'must': [{'regexp': {'request.keyword': '.*curl.*'}},
-                             {'term': {'@timestamp': day2}}]}},
-                {'bool': {
-                    'must': [{'regexp': {'request.keyword': '.*fetch.*'}},
-                             {'term': {'@timestamp': day2}}]}},
-                {'bool': {
-                    'must': [{'regexp': {'request.keyword': '.*java.net.URL.*'}},
-                             {'term': {'@timestamp': day2}}]}},
-                {'bool': {
-                    'must': [{'regexp': {'request.keyword': '.*bitsadmin.*'}},
-                             {'term': {'@timestamp': day2}}]}},
-                {'bool': {
-                    'must': [{'regexp': {'request.keyword': '.*explorer.*'}},
-                             {'term': {'@timestamp': day2}}]}},
-                {'bool': {
-                    'must': [{'regexp': {'request.keyword': '.*certutil.*'}},
-                             {'term': {'@timestamp': day2}}]}},
-                {'bool': {
-                    'must': [{'regexp': {'request.keyword': '.*Wscript.*'}},
-                             {'term': {'@timestamp': day2}}]}},
-                {'bool': {
-                    'must': [{'regexp': {'request.keyword': '.*lwp-download.*'}},
-                             {'term': {'@timestamp': day2}}]}},
-                {'bool': {
-                    'must': [{'regexp': {'request.keyword': '.*HTTP.start.*'}},
-                             {'term': {'@timestamp': day2}}]}},
-                {'bool': {
-                    'must': [{'regexp': {'request.keyword': '.*getstore.*'}},
-                             {'term': {'@timestamp': day2}}]}},
-                {'bool': {
-                    'must': [{'regexp': {'request.keyword': '.*mshta.*'}},
-                             {'term': {'@timestamp': day2}}]}},
-                {'bool': {
-                    'must': [{'regexp': {'request.keyword': '.*objXMLHTTP.*'}},
-                             {'term': {'@timestamp': day2}}]}},
-                {'bool': {
-                    'must': [{'regexp': {'request.keyword': '.*urlopen.*'}},
-                             {'term': {'@timestamp': day2}}]}}],
+    query = {'query':{
+            'must': [{'regexp': {'analysis_tags.keyword': '.*'}},
+                     {'term': {'@timestamp': day2}}]}}],
             'must_not': [
-                {'match_phrase': {'request': 'User-Agent: wget'}},
-                {'match_phrase': {'request': 'User-Agent: curl'}}
+                {'match_phrase': {'source_ip': '0.0.0.0'}}
             ]}}}
     while len(log) != 0:
         result = es.search(index=day1, body=query, size=1)
@@ -101,8 +58,10 @@ def get_badip():  # 攻撃（悪意フラグ）ip抽出
         if len(log) != 0:
             query['query']['bool']['must_not'].append({'match_phrase': {'source_ip': log[0]["_source"]["source_ip"]}})
             badip_list.append(log[0]["_source"]["source_ip"])
+        print(log[0]["_source"]['analysis_tags'])
     print('攻撃活動のip数:')
     print(len(badip_list))
+    input()
 
 
 def get_pattern3():  # 単発リクエストのIp抽出
