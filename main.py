@@ -92,7 +92,7 @@ def get_badip():  # 攻撃（悪意フラグ）ip抽出
                                'must':[{'regexp': {'request.keyword': '.*urlopen.*http.*:[0-9].*'}},
                                        {'match': {'@timestamp': day2}}]}}],
                        'must_not': [
-                           {'match_phrase': {'source_ip': '0'}}
+                           {'match_phrase': {'source_ip': '0.0.0.0'}}
                        ]}}}
     while len(log) != 0:
         result = es.search(index=day1, body=query, size=1)
@@ -100,8 +100,6 @@ def get_badip():  # 攻撃（悪意フラグ）ip抽出
         if len(log) != 0:
             query['query']['bool']['must_not'].append({'match_phrase': {'source_ip': log[0]["_source"]["source_ip"]}})
             badip_list.append(log[0]["_source"]["source_ip"])
-            print(log[0]["_source"]["source_ip"])
-            print(log[0]["_source"]["url"])
     print('攻撃活動のip数')
     print(len(badip_list))
 
