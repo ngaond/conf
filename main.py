@@ -47,9 +47,10 @@ def get_badip():  # 攻撃（悪意フラグ）ip抽出
     global day2
     log = ['TEST']
     query = {'query':{
-            'must': [{'regexp': {'analysis_tags.keyword': '.*'}},
-                     {'term': {'@timestamp': day2}}]}}],
-            'must_not': [
+              'bool': {
+                'must': [{'regexp': {'analysis_tags.keyword': '.*'}},
+                     {'term': {'@timestamp': day2}}],
+                'must_not': [
                 {'match_phrase': {'source_ip': '0.0.0.0'}}
             ]}}}
     while len(log) != 0:
